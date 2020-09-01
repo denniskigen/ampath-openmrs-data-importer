@@ -1,0 +1,19 @@
+{
+  "name": "ampath-openmrs-data-importer",
+  "version": "1.0.0",
+  "description": "Used to import data from one openmrs instance to another, where the structure and concepts are different",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nkimaina/ampath-openmrs-data-importer.git"
+  },
+  "author": "AMPATH Developers",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nkimaina/ampath-openmrs-data-importer/issues"
+  },
+  "homepage": "https://github.com/nkimaina/ampath-openmrs-data-importer#readme"
+}
