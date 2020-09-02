@@ -4,6 +4,7 @@
   "description": "Used to import data from one openmrs instance to another, where the structure and concepts are different",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "npm test"
   },
   "repository": {
@@ -15,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/nkimaina/ampath-openmrs-data-importer/issues"
   },
-  "homepage": "https://github.com/nkimaina/ampath-openmrs-data-importer#readme"
+  "homepage": "https://github.com/nkimaina/ampath-openmrs-data-importer#readme",
+  "dependencies": {
+    "csv-parser": "^2.3.3"
+  }
 }
