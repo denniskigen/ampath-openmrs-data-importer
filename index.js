@@ -1,4 +1,5 @@
 const readCsv = require('./read-csv');
+const writeCsv = require('./write-csv');
 const map = require('./concept-sources');
 const pathToIncomingDataDictionary = 'KenyaEMR-concepts-used.csv';
 const pathToExistingDataDictionary = 'amrs.csv';
@@ -23,10 +24,10 @@ const findMissingConcepts = (source, destination) => {
                     source: cur
                 });
                 if(cur.datatype !== exists.datatype) {
-                    r.datatypeMismatch.push({
-                        destination: exists,
-                        source: cur
-                    });
+                    var miss = Object.assign({}, cur);
+                    miss['amrs_id'] = exists.concept_id;
+                    miss['amrs_datatype'] = exists.datatype;
+                    r.datatypeMismatch.push(miss);
                 }
                 break;
             }
@@ -49,6 +50,39 @@ const start = async ()=> {
     console.log('found: ', processed.found.length);
     console.log('datatypeMismatch: ', processed.datatypeMismatch.length);
     // console.log('found: ', processed.datatypeMismatch);
+
+    var header = [
+        {
+            id: 'concept_id', 
+            title: 'concept_id' 
+        },
+        {
+            id: 'code', 
+            title: 'code' 
+        },
+        {
+            id: 'source', 
+            title: 'source' 
+        },
+        {
+            id: 'datatype', 
+            title: 'datatype' 
+        }
+    ];
+
+    var extra = [
+        {
+            id: 'amrs_id', 
+            title: 'amrs_id' 
+        },
+        {
+            id: 'amrs_datatype', 
+            title: 'amrs_datatype' 
+        }
+    ];
+
+    await writeCsv('missing.csv', header,  processed.missing);
+    await writeCsv('datatype-mismatch.csv', header.concat(extra),  processed.datatypeMismatch);
 };
 
 start();
