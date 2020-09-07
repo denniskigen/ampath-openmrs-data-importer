@@ -1,0 +1,14 @@
+{
+    "kenyaemrConnection": {
+        "host": "",
+        "user": "",
+        "password": "",
+        "database": ""
+    },
+    "amrsConnection": {
+        "host": "",
+        "user": "",
+        "password": "",
+        "database": ""
+    }
+}
