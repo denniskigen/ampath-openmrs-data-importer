@@ -1,6 +1,5 @@
 const readCsv = require('./read-csv');
 const writeCsv = require('./write-csv');
-const db = require('./connection');
 const map = require('../metadata/concept-sources');
 const pathToIncomingDataDictionary = 'metadata/KenyaEMR-concepts-used.csv';
 const pathToExistingDataDictionary = 'metadata/amrs.csv';
@@ -87,12 +86,7 @@ const populateMissingConcepts = async ()=> {
 };
 
 const start = async ()=> {
-    // await populateMissingConcepts();
-    db.createConnectionPool();
-    var results = await db.queryAmrs('select count(*) as concepts from concept');
-    var results2 = await db.queryKenyaemr('select count(*) as concepts from concept');
-    console.log("results", results, results2);
-    await db.closeAllConnections();
+    await populateMissingConcepts();
 };
 
 start();
