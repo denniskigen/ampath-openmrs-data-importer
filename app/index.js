@@ -1,9 +1,9 @@
 const readCsv = require('./read-csv');
 const writeCsv = require('./write-csv');
 const db = require('./connection');
-const map = require('./concept-sources');
-const pathToIncomingDataDictionary = 'KenyaEMR-concepts-used.csv';
-const pathToExistingDataDictionary = 'amrs.csv';
+const map = require('../metadata/concept-sources');
+const pathToIncomingDataDictionary = 'metadata/KenyaEMR-concepts-used.csv';
+const pathToExistingDataDictionary = 'metadata/amrs.csv';
 
 const findMissingConcepts = (source, destination) => {
     var r = {
@@ -82,8 +82,8 @@ const populateMissingConcepts = async ()=> {
         }
     ];
 
-    await writeCsv('missing.csv', header,  processed.missing);
-    await writeCsv('datatype-mismatch.csv', header.concat(extra),  processed.datatypeMismatch);
+    await writeCsv('metadata/missing.csv', header,  processed.missing);
+    await writeCsv('metadata/datatype-mismatch.csv', header.concat(extra),  processed.datatypeMismatch);
 };
 
 const start = async ()=> {

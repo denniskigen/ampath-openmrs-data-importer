@@ -4,8 +4,10 @@
   "description": "Used to import data from one openmrs instance to another, where the structure and concepts are different",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "npm test"
+    "start": "node app/index.js",
+    "test": "npm test",
+    "tsc": "tsc",
+    "prod": "tsc && node ./build/app.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,7 @@
   "dependencies": {
     "csv-parser": "^2.3.3",
     "csv-writer": "^1.6.0",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "typescript": "^4.0.2"
   }
 }

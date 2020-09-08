@@ -1,4 +1,4 @@
-const config = require("./config.json");
+const config = require("../configs/config.json");
 var mysql = require('mysql');
 
 var mod = {};
@@ -59,6 +59,18 @@ mod.queryAmrs = async (query) => {
 mod.queryKenyaemr = async (query) => {
     return await queryPool(mod.kenyaemrPool, query);
 };
+
+mod.query = async (query, connection) => {
+    return new Promise((resolve, reject)=>{
+        connection.query(query, (error, results,fields)=>{
+            if(error) {
+                reject(error);
+            } else {
+                resolve(results);
+            }
+        });
+    });
+}
 
 mod.closeAmrsPool = async () => {
     return new Promise((success, error)=>{
