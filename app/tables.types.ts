@@ -2,20 +2,20 @@ export type Person = {
     person_id: number;
     uuid: string;
     gender: string;
-    birthdate: string;
+    birthdate: Date;
     birthdate_estimated: number;
     birthtime: string;
     dead: number;
-    death_date: string;
+    death_date: Date;
     deathdate_estimated: number;
     cause_of_death: any;
     creator: number;
-    date_created: string;
+    date_created: Date;
     changed_by: number;
-    date_changed: string;
+    date_changed: Date;
     voided: number;
     voided_by: number;
-    date_voided: string;
+    date_voided: Date;
     void_reason: string;
 };
 
