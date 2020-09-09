@@ -65,7 +65,7 @@ export default class ConnectionManager {
 
     async rollbackTransaction(connection: Connection): Promise<Connection> {
         return new Promise<Connection>((resolve, reject)=>{
-            console.log('Rolling back transaction..');
+            console.warn('Rolling back transaction..');
             connection.rollback(() => {
                 resolve(connection);
             });
