@@ -117,3 +117,27 @@ export type PatientIdentifier = {
     void_reason: string;
     uuid: string;
 };
+export type User = {
+    user_id: number;
+    system_id: string;
+    username: string;
+    password: string;
+    salt: string;
+    secret_question: string;
+    secret_answer: string;
+    creator: number;
+    date_created: Date;
+    changed_by: number;
+    date_changed: Date;
+    person_id: string;
+    retired: number;
+    retired_by: number;
+    date_retired: Date;
+    retire_reason: string;
+    uuid: string;
+}
+
+export type UserRole = {
+user_id: number;
+role: string;
+}
