@@ -3,12 +3,14 @@
         "host": "",
         "user": "",
         "password": "",
-        "database": ""
+        "database": "",
+        "port": ""
     },
     "amrsConnection": {
         "host": "",
         "user": "",
         "password": "",
-        "database": ""
+        "database": "",
+        "port": ""
     }
 }

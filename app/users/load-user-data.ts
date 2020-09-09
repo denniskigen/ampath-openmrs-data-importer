@@ -1,6 +1,6 @@
-import ConnectionManager from "./connection-manager";
+import ConnectionManager from "../connection-manager";
 import { Connection } from "mysql";
-import { User, UserRole } from "./tables.types";
+import { User, UserRole } from "../tables.types";
 const con = ConnectionManager.getInstance();
 
 export type UserData = {
@@ -29,4 +29,8 @@ export async function fetchUserRole(userId: number, connection: any) {
     const sql = `select * from user_role where user_id= ${userId}`;
     let results: UserRole[] = await con.query(sql, connection);
     return results[0];
+}
+export async function loadUserDataByUuid(userUuid: string, connection:Connection) {
+    const userId = await fetchUserByUuid(userUuid, connection);
+    return await loadUserData(userId, connection);
 }

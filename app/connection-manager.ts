@@ -22,6 +22,7 @@ export default class ConnectionManager {
             user: conf.user,
             password: conf.password,
             database: conf.database,
+            port: conf.port,
             connectionLimit: conf.connectionLimit
         });
     }

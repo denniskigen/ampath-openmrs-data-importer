@@ -1,6 +1,6 @@
-import ConnectionManager from "./connection-manager";
+import ConnectionManager from "../connection-manager";
 import { Connection } from "mysql";
-import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "./tables.types";
+import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "../tables.types";
 import { PatientData } from "./patient-data";
 const CM = ConnectionManager.getInstance();
 
