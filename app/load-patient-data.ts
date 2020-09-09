@@ -1,18 +1,13 @@
 import ConnectionManager from "./connection-manager";
 import { Connection } from "mysql";
 import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "./tables.types";
-const con = ConnectionManager.getInstance();
+import { PatientData } from "./patient-data";
+const CM = ConnectionManager.getInstance();
 
-export type PatientData = {
-    person: Person;
-    patient: Patient;
-    address: Address;
-    names: PersonName[];
-    attributes: PersonAttribute[];
-    identifiers: PatientIdentifier[];
-};
-
-
+export async function loadPatientDataByUuid(personUuid: string, connection:Connection) {
+    const personId = await fetchPersonIdByUuid(personUuid, connection);
+    return await loadPatientData(personId, connection);
+}
 
 export default async function loadPatientData(patientId: number, connection:Connection) {
     let person = await fetchPerson(patientId, connection);
@@ -32,38 +27,45 @@ export default async function loadPatientData(patientId: number, connection:Conn
     return results;
 }
 
+export async function fetchPersonIdByUuid(personUuid: string, connection: Connection) {
+    const sql = `select person_id from person where uuid= '${personUuid}'`;
+    let results:any[] = await CM.query(sql, connection);
+    console.log('persons with uuid', results);
+    return  results.length > 0 ? results[0]['person_id'] as number : -1;
+}
+
 export async function fetchPerson(personId: number, connection: Connection) {
     const sql = `select * from person where person_id= ${personId}`;
-    let results: Person[] = await con.query(sql, connection);
+    let results: Person[] = await CM.query(sql, connection);
     return results[0];
 }
 
 export async function fetchPatient(personId: number, connection: Connection) {
     const sql = `select * from patient where patient_id= ${personId}`;
-    let results: Patient[] = await con.query(sql, connection);
+    let results: Patient[] = await CM.query(sql, connection);
     return results[0];
 }
 
 export async function fetchAddress(personId: number, connection: Connection) {
     const sql = `select * from person_address where person_id= ${personId}`;
-    let results: Address[] = await con.query(sql, connection);
+    let results: Address[] = await CM.query(sql, connection);
     return results[0];
 }
 
 export async function fetchPersonNames(personId: number, connection: Connection) {
     const sql = `select * from person_name where person_id= ${personId}`;
-    let results: PersonName[] = await con.query(sql, connection);
+    let results: PersonName[] = await CM.query(sql, connection);
     return results;
 }
 
 export async function fetchPersonAttributes(personId: number, connection: Connection) {
     const sql = `select * from person_attribute where person_id= ${personId}`;
-    let results: PersonAttribute[] = await con.query(sql, connection);
+    let results: PersonAttribute[] = await CM.query(sql, connection);
     return results;
 }
 
 export async function fetchPersonIdentifiers(personId: number, connection: Connection) {
     const sql = `select * from patient_identifier where patient_id= ${personId}`;
-    let results: PatientIdentifier[] = await con.query(sql, connection);
+    let results: PatientIdentifier[] = await CM.query(sql, connection);
     return results;
 }

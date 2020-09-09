@@ -33,6 +33,45 @@ export default class ConnectionManager {
         return this.getConnection(this.kenyaemrPool);
     }
 
+    async startTransaction(connection: Connection): Promise<Connection> {
+        return new Promise<Connection>((resolve, reject)=>{
+            console.log('Beginning transaction..');
+            connection.beginTransaction((err) => {
+                if (err) { 
+                    console.error('Starting transaction failed: ', err);
+                    reject(err);
+                    return;
+                }
+                resolve(connection);
+            });
+        });
+    }
+
+    async commitTransaction(connection: Connection): Promise<Connection> {
+        return new Promise<Connection>((resolve, reject)=>{
+            console.log('Committing transaction..');
+            connection.commit((err) => {
+                if (err) { 
+                    console.error('Committing transaction failed, rolling back.. ', err);
+                    connection.rollback(() => {
+                        reject(err);
+                    });
+                    return;
+                }
+                resolve(connection);
+            });
+        });
+    }
+
+    async rollbackTransaction(connection: Connection): Promise<Connection> {
+        return new Promise<Connection>((resolve, reject)=>{
+            console.log('Rolling back transaction..');
+            connection.rollback(() => {
+                resolve(connection);
+            });
+        });
+    }
+
     async queryPool(pool: Pool, query: string): Promise<any> {
         return new Promise<any>((success, error) => {
             pool.query(query, function (err: MysqlError, results: [], fields: []) {
