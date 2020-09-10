@@ -13,7 +13,7 @@ export async function saveUser(user: UserData, connection:Connection) {
 }
 
 export function toUserInsertStatement(user: User) {
-    return toInsertSql(user, ['person_id'], 'person');
+    return toInsertSql(user, ['user_id'], 'users');
 }
 
 export function toInsertSql(obj:any, excludeColumns:string[], table:string) {

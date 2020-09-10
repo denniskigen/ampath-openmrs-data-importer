@@ -129,7 +129,7 @@ export type User = {
     date_created: Date;
     changed_by: number;
     date_changed: Date;
-    person_id: string;
+    person_id: number;
     retired: number;
     retired_by: number;
     date_retired: Date;
