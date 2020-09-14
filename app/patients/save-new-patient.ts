@@ -1,8 +1,8 @@
 import mysql, { Connection } from "mysql";
 import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "../tables.types";
 import { PatientData } from "./patient-data";
-import ConnectionManager from "./connection-manager";
-import UserMap from "./user-map";
+import ConnectionManager from "../connection-manager";
+import UserMap from "../users/user-map";
 const CM = ConnectionManager.getInstance();
 
 export default async function savePatientData(patient: PatientData, connection:Connection) {
@@ -11,11 +11,16 @@ export default async function savePatientData(patient: PatientData, connection:C
 }
 
 export async function savePerson(patient: PatientData, connection:Connection, userMap?:any) {
-    let replaceColumns = {
-        creator: userMap[patient.person.creator],
-        changed_by: userMap[patient.person.changed_by],
-        voided_by: userMap[patient.person.voided_by],
-    };
+    console.log("MApe", userMap[patient.person.creator], patient)
+    let replaceColumns = {};
+    if(userMap){
+         replaceColumns = {
+            creator: userMap[patient.person.creator],
+            changed_by: userMap[patient.person.changed_by],
+            voided_by: userMap[patient.person.voided_by],
+        };
+    }
+   
     await CM.query(toPersonInsertStatement(patient.person, replaceColumns), connection);
 }
 

@@ -136,8 +136,3 @@ export type User = {
     retire_reason: string;
     uuid: string;
 }
-
-export type UserRole = {
-user_id: number;
-role: string;
-}

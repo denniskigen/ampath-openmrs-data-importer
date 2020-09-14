@@ -1,9 +1,11 @@
 import transferUserToAmrs from "./copy-over-user";
+import UserMap from "./user-map";
 
 console.log('Starting application..');
 
 async function start() {
     let map = [];
+    await UserMap.instance.initialize();
     let users: any = [
         '1',
         '2',
@@ -84,7 +86,7 @@ async function start() {
         if(amrsUserID === ''){
             userId = parseInt(user);
         }
-        map.push({ amrsId: userId, kenyaEmrUserId: parseInt(user) })
+        map.push(parseInt(user) +":"+ userId)
         
     }
     console.info("Map", map)
