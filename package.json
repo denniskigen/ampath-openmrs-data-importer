@@ -6,6 +6,7 @@
   "scripts": {
     "start": "tsc && node ./build/app/app.js",
     "migrate-users": "tsc && node ./build/app/users/process-user-migration.js",
+    "migrate-encounters": "tsc && node ./build/app/encounters/process-encounters.js",
     "extract:concepts": "node app/process-concepts.js",
     "tsc": "tsc"
   },

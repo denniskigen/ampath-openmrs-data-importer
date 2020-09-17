@@ -253,3 +253,27 @@ export type Provider = {
     retire_reason: string;
     uuid: string;
 }
+export type UserRole = {
+    user_id: number;
+    role: string;
+}
+
+export type Encounter = {
+    encounter_id: number;
+    encounter_type: number;
+    patient_id: number;
+    location_id: number;
+    form_id: number;
+    encounter_datetime: Date;
+    creator: number;
+    date_created: Date
+    voided: number
+    voided_by: number;
+    date_voided: Date;
+    void_reason: string;
+    changed_by: number;
+    date_changed: Date;
+    visit_id: number;
+    uuid: string;
+
+}

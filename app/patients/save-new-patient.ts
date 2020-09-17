@@ -4,6 +4,7 @@ import { PatientData } from "./patient-data";
 import ConnectionManager from "../connection-manager";
 import UserMapper from "../users/user-map";
 import toInsertSql from "../prepare-insert-sql";
+
 const CM = ConnectionManager.getInstance();
 
 export default async function savePatientData(patient: PatientData, connection: Connection) {
