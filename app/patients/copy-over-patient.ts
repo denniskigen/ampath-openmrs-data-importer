@@ -1,4 +1,4 @@
-import ConnectionManager from './connection-manager';
+import ConnectionManager from '../connection-manager';
 import savePatientData from './save-new-patient';
 import loadPatientData, { loadPatientDataByUuid } from './load-patient-data';
 const CM = ConnectionManager.getInstance();

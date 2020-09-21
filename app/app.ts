@@ -1,5 +1,4 @@
-import transferPatientToAmrs from "./copy-over-patient";
-
+import transferPatientToAmrs from "./patients/copy-over-patient";
 
 console.log('Starting application..');
 
