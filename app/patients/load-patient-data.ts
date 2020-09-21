@@ -18,13 +18,15 @@ export default async function loadPatientData(patientId: number, connection:Conn
     let attributes = await fetchPersonAttributes(patientId, connection);
     let identifiers = await fetchPersonIdentifiers(patientId, connection);
     let obs = await loadPatientObs(patientId, connection);
+    
     let results: PatientData = {
         person: person,
         patient: patient,
         address: address,
         names: names,
         attributes: attributes,
-        identifiers:identifiers
+        identifiers:identifiers,
+        obs: obs
     };
     return results;
 }

@@ -68,6 +68,7 @@ export default class ConnectionManager {
         return new Promise<Connection>((resolve, reject) => {
             console.warn('Rolling back transaction..');
             connection.rollback(() => {
+                console.warn('Rolling back complete.');
                 resolve(connection);
             });
         });
