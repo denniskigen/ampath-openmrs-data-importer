@@ -9,10 +9,16 @@ export default async function transferPatientToAmrs(personId: number) {
     console.log('patient', patient);
     let amrsCon = await CM.getConnectionAmrs();
     amrsCon = await CM.startTransaction(amrsCon);
-    await savePatientData(patient, amrsCon);
-    const saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
-    console.log('saved patient', saved);
-    await CM.rollbackTransaction(amrsCon);
-    const rollBack = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
-    console.log('rollback patient', rollBack);
+    try {
+        await savePatientData(patient, amrsCon);
+        const saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
+        console.log('saved patient', saved);
+        await CM.rollbackTransaction(amrsCon);
+        const rollBack = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
+        console.log('rollback patient', rollBack);
+    } catch(er) {
+        console.error('Error saving patient:', er);
+        await CM.rollbackTransaction(amrsCon);
+    }
+    
 }

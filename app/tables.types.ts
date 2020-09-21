@@ -136,3 +136,37 @@ export type User = {
     retire_reason: string;
     uuid: string;
 }
+
+export type Obs = {
+    obs_id: number;
+    person_id: number;
+    concept_id: number;
+    encounter_id: number;
+    order_id: number;
+    obs_datetime: Date;
+    location_id: number;
+    obs_group_id: number;
+    accession_number: string;
+    value_group_id: number;
+    value_boolean: number;
+    value_coded: number;
+    value_coded_name_id: number;
+    value_drug: number;
+    value_datetime: Date;
+    value_numeric: number;
+    value_modifier: string;
+    value_text: string;
+    value_complex: string;
+    comments: string;
+    creator: number;
+    date_created: Date;
+    voided: number;
+    voided_by: number;
+    date_voided: Date;
+    void_reason: string;
+    uuid: string;
+    form_namespace_and_path: number;
+    previous_version: string;   
+    status: string; // Default FINAL
+    interpretation: number;
+};

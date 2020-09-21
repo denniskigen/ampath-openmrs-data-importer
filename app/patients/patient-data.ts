@@ -1,4 +1,4 @@
-import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "../tables.types";
+import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier, Obs } from "../tables.types";
 
 export type PatientData = {
     person: Person;
@@ -7,4 +7,5 @@ export type PatientData = {
     names: PersonName[];
     attributes: PersonAttribute[];
     identifiers: PatientIdentifier[];
+    obs: Obs[];
 }
