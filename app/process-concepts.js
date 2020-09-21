@@ -19,10 +19,14 @@ const findMissingConcepts = (source, destination) => {
             var exists = destination.dictionary[equivalentSource + cur.code];
             if(exists) {
                 found = true;
-                r.found.push({
-                    destination: exists,
-                    source: cur
-                });
+                var f = Object.assign({}, cur);
+                f['amrs_id'] = exists.concept_id;
+                f ['amrs_datatype'] = exists.datatype;
+                r.found.push(f);
+                // r.found.push({
+                //     destination: exists,
+                //     source: cur
+                // });
                 if(cur.datatype !== exists.datatype) {
                     var miss = Object.assign({}, cur);
                     miss['amrs_id'] = exists.concept_id;
@@ -83,6 +87,7 @@ const populateMissingConcepts = async ()=> {
 
     await writeCsv('metadata/missing.csv', header,  processed.missing);
     await writeCsv('metadata/datatype-mismatch.csv', header.concat(extra),  processed.datatypeMismatch);
+    await writeCsv('metadata/found.csv', header.concat(extra),  processed.found);
 };
 
 const start = async ()=> {
