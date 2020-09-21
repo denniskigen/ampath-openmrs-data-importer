@@ -2,6 +2,7 @@ import ConnectionManager from "../connection-manager";
 import { Connection } from "mysql";
 import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "../tables.types";
 import { PatientData } from "./patient-data";
+import loadPatientObs from "../encounters/load-patient-obs";
 const CM = ConnectionManager.getInstance();
 
 export async function loadPatientDataByUuid(personUuid: string, connection:Connection) {
@@ -16,6 +17,7 @@ export default async function loadPatientData(patientId: number, connection:Conn
     let names = await fetchPersonNames(patientId, connection);
     let attributes = await fetchPersonAttributes(patientId, connection);
     let identifiers = await fetchPersonIdentifiers(patientId, connection);
+    let obs = await loadPatientObs(patientId, connection);
     let results: PatientData = {
         person: person,
         patient: patient,
