@@ -3,6 +3,7 @@ import { Connection } from "mysql";
 import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "../tables.types";
 import { PatientData } from "./patient-data";
 import loadPatientObs from "../encounters/load-patient-obs";
+import loadVisitData from "../visits/load-visits-data";
 const CM = ConnectionManager.getInstance();
 
 export async function loadPatientDataByUuid(personUuid: string, connection:Connection) {
@@ -18,7 +19,7 @@ export default async function loadPatientData(patientId: number, connection:Conn
     let attributes = await fetchPersonAttributes(patientId, connection);
     let identifiers = await fetchPersonIdentifiers(patientId, connection);
     let obs = await loadPatientObs(patientId, connection);
-    
+    let visits = await loadVisitData(patientId, connection);  
     let results: PatientData = {
         person: person,
         patient: patient,
@@ -26,7 +27,8 @@ export default async function loadPatientData(patientId: number, connection:Conn
         names: names,
         attributes: attributes,
         identifiers:identifiers,
-        obs: obs
+        obs: obs,
+        visits:visits
     };
     return results;
 }
