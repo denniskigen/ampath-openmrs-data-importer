@@ -166,7 +166,41 @@ export type Obs = {
     void_reason: string;
     uuid: string;
     form_namespace_and_path: number;
-    previous_version: string;   
+    previous_version: string;
     status: string; // Default FINAL
     interpretation: number;
+}
+export type Visit = {
+    visit_id: number;
+    patient_id: number;
+    visit_type_id: number;
+    date_started: Date;
+    date_stopped: Date;
+    indication_concept_id: number;
+    location_id: number;
+    creator: number;
+    date_created: Date;
+    changed_by: number;
+    date_changed: Date;
+    voided: number;
+    voided_by: number;
+    date_voided: Date;
+    void_reason: string;
+    uuid: string;
 };
+
+export type VisitAttribute = {
+    visit_attribute_id: number;
+    visit_id: number;
+    attribute_type_id: number;
+    value_reference: number;
+    uuid: string;
+    creator: number;
+    date_created: Date;
+    changed_by: number;
+    date_changed: Date;
+    voided: number;
+    voided_by: number
+    date_voided: Date;
+    void_reason: string;
+}
