@@ -11,13 +11,12 @@ export default async function savePatientData(patient: PatientData, connection:C
 }
 
 export async function savePerson(patient: PatientData, connection:Connection, userMap?:any) {
-    console.log("MApe", userMap[patient.person.creator], patient)
     let replaceColumns = {};
     if(userMap){
          replaceColumns = {
-            creator: userMap[patient.person.creator],
-            changed_by: userMap[patient.person.changed_by],
-            voided_by: userMap[patient.person.voided_by],
+            creator: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === patient.person.creator )?.amrsUserID,
+            changed_by: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === patient.person.changed_by )?.amrsUserID,
+            voided_by: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === patient.person.voided_by )?.amrsUserID,
         };
     }
    

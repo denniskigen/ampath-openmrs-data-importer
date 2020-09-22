@@ -21,6 +21,11 @@ export async function fetchUser(userId: number, connection: any) {
     let results: User[] = await con.query(sql, connection);
     return results[0];
 }
+export async function fetchUsers(connection: any) {
+    const sql = `select * from users`;
+    let results: User[] = await con.query(sql, connection);
+    return results;
+}
 export async function loadUserDataByUuid(userUuid: string, connection:Connection) {
     const userId = await fetchUserByUuid(userUuid, connection);
     return await loadUserData(userId, connection);
