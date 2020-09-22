@@ -27,9 +27,9 @@ export default async function transferUserToAmrs(userId: number) {
         await saveUserData(userData, amrsCon);
         const saved = await loadUserDataByUuid(userData.user.uuid, amrsCon);
         console.log('saved user', saved);
-        await CM.rollbackTransaction(amrsCon);
-        const rollBack = await loadUserDataByUuid(userData.user.uuid, amrsCon);
-        console.log('rollback patient', rollBack);
+        await CM.commitTransaction(amrsCon);
+        const commitedUser = await loadUserDataByUuid(userData.user.uuid, amrsCon);
+        console.log('commited user', commitedUser);
         CM.releaseConnections(kenyaEmrCon, amrsCon);
         return saved.user.user_id;
     }else{

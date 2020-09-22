@@ -187,7 +187,8 @@ export type Visit = {
     date_voided: Date;
     void_reason: string;
     uuid: string;
-};
+
+}
 
 export type VisitAttribute = {
     visit_attribute_id: number;
