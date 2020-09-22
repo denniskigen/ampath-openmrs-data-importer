@@ -35,7 +35,6 @@ export async function saveObs(mappedObs: Obs[], sourceObs:Obs[], newPatientId:nu
         // console.log('sql', sql);
         const results = await CM.query(sql, connection); // TODO save once encounters are ready
         obsMap[sourceObs[i].obs_id] = results.insertId;
-        console.log('Obs insert', results);
     }
     console.log('Skipped obs count ' + skippedObsCount + '/' + sourceObs.length);
     return obsMap;
