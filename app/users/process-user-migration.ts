@@ -1,11 +1,11 @@
 import transferUserToAmrs from "./copy-over-user";
-import UserMap from "./user-map";
+import UserMapper from "./user-map";
 
 console.log('Starting application..');
 
 async function start() {
     let map = [];
-    await UserMap.instance.initialize();
+    await UserMapper.instance.initialize();
     let users: any = [
         '1',
         '2',

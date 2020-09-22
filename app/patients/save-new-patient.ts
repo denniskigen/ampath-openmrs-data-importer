@@ -2,13 +2,13 @@ import mysql, { Connection } from "mysql";
 import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "../tables.types";
 import { PatientData } from "./patient-data";
 import ConnectionManager from "../connection-manager";
-import UserMap from "../users/user-map";
+import UserMapper from "../users/user-map";
 import toInsertSql from "../prepare-insert-sql";
 const CM = ConnectionManager.getInstance();
 
 export default async function savePatientData(patient: PatientData, connection: Connection) {
-    await UserMap.instance.initialize();
-    return savePerson(patient, connection, UserMap.instance.userMap);
+    await UserMapper.instance.initialize();
+    return savePerson(patient, connection, UserMapper.instance.userArray);
 }
 
 export async function savePerson(patient: PatientData, connection: Connection, userMap?: any) {
@@ -31,7 +31,7 @@ export function toPersonInsertStatement(person: Person, replaceColumns?: any) {
 
 export async function savePatient(patient: PatientData, personId: number, connection: Connection) {
     console.log("user person id", personId);
-    const userMap = UserMap.instance.userMap;
+    const userMap = UserMapper.instance.userArray;
     let replaceColumns = {};
     if (userMap) {
         replaceColumns = {

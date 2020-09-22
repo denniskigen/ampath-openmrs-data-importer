@@ -7,7 +7,7 @@ export default function toInsertSql(obj:any, excludeColumns:string[], table:stri
         if(excludeColumns.includes(o)) {
             continue;
         }
-        if(replaceColumns[o]) {
+        if(replaceColumns[o] !== undefined) {
             set[o] = replaceColumns[o];
         } else {
             set[o] = obj[o];

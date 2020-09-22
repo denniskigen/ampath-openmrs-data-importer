@@ -3,7 +3,7 @@ import loadUserData, { loadUserDataByUuid } from './load-user-data';
 import saveUserData from './save-user-data';
 import loadPatientData, { fetchPerson, loadPatientDataByUuid } from '../patients/load-patient-data';
 import { savePerson } from '../patients/save-new-patient';
-import UserMap from './user-map';
+import UserMapper from './user-map';
 const CM = ConnectionManager.getInstance();
 
 export default async function transferUserToAmrs(userId: number) {
@@ -15,7 +15,7 @@ export default async function transferUserToAmrs(userId: number) {
     const AmrsuserData = await loadUserDataByUuid(userData.user.uuid, amrsCon);
     console.warn("AMRS User", AmrsuserData);
     if (AmrsuserData.user === undefined) {
-        await UserMap.instance.initialize();
+        await UserMapper.instance.initialize();
         console.log("User doesn't exit, creating")
         const patient = await loadPatientData(userData.user.person_id, kenyaEmrCon);
         amrsCon = await CM.startTransaction(amrsCon);

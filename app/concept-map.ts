@@ -35,14 +35,14 @@ export default class ConceptMapper {
 }
 
 export type FoundConcept = {
-    concept_id:number;
+    concept_id:string;
     code: string;
     source: string;
     datatype: string;
-    amrs_id: number;
+    amrs_id: string;
     amrs_datatype: string;
 }
 
 export type ConceptMap = {
-    [source_concept_id: number]: FoundConcept;
+    [source_concept_id: string]: FoundConcept;
 };
