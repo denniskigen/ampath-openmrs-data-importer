@@ -19,6 +19,8 @@ export default async function transferUserToAmrs(userId: number) {
         console.log("User doesn't exit, creating")
         const patient = await loadPatientData(userData.user.person_id, kenyaEmrCon);
         amrsCon = await CM.startTransaction(amrsCon);
+
+        try {
         await savePerson(patient, amrsCon, {});
         const savedPerson = await loadPatientDataByUuid(patient.person.uuid, amrsCon)
         console.log('saved person', savedPerson);
@@ -32,7 +34,13 @@ export default async function transferUserToAmrs(userId: number) {
         console.log('commited user', commitedUser);
         CM.releaseConnections(kenyaEmrCon, amrsCon);
         return saved.user.user_id;
-    }else{
+        } catch (err) {
+            console.error('Unable to save user. Details:',err);
+            await CM.rollbackTransaction(amrsCon);
+            CM.releaseConnections(kenyaEmrCon, amrsCon);
+            return '';
+        }
+    } else {
         CM.releaseConnections(kenyaEmrCon, amrsCon);
         return '';
     }
