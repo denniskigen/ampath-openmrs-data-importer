@@ -1,8 +1,11 @@
 // sets up the user map between kenyaemr and amrs
 
+import ConnectionManager from "../connection-manager";
+import { fetchUsers } from "./load-user-data";
+
 export default class UserMap {
     private static _instance: UserMap;
-    private _userMap:any;
+    private _userMap: any;
     private constructor() {
     }
     static get instance(): UserMap {
@@ -13,27 +16,19 @@ export default class UserMap {
     }
 
     async initialize() {
+        const CM = ConnectionManager.getInstance();
+        let kenyaEmrCon = await CM.getConnectionKenyaemr();
+        let amrsCon = await CM.getConnectionAmrs();
         // load user mapping here
-        this._userMap = {
-            1: 168393, 2: 2, 3: 168394, 4: 168395,
-            5: 168396, 6: 168397, 7: 168398, 8: 168399,
-            9: 168400, 10: 168401, 11: 168402, 12: 168403,
-            13: 168404, 14: 168405, 15: 168406, 16: 168407,
-            17: 168408, 18: 168409, 19: 168410, 20: 168411,
-            21: 168412, 22: 168413, 29: 168414, 44: 168415,
-            45: 168416, 55: 168417, 58: 168418, 64: 168419,
-            65: 168420, 66: 168421, 68: 168422, 69: 168423,
-            70: 168424, 71: 168425, 23: 168426, 24: 168427,
-            25: 168428, 26: 168429, 27: 168430, 28: 168431,
-            30: 168432, 32: 168433, 33: 168434, 34: 168435,
-            35: 168436, 36: 168437, 37: 168438, 38: 168439,
-            39: 168440, 40: 168441, 41: 168442, 42: 168443,
-            43: 168444, 46: 168445, 47: 168446, 48: 168447,
-            49: 168448, 50: 168449, 51: 168450, 52: 168451,
-            53: 168452, 54: 168453, 56: 168454, 57: 168455,
-            59: 168456, 60: 168457, 61: 168458, 62: 62,
-            63: 168459, 67: 168460
-        };
+        this._userMap = [];
+        const loadKemrUsers = await fetchUsers(kenyaEmrCon);
+        const loadAmrsUsers = await fetchUsers(amrsCon);
+        for (const kusers of loadKemrUsers) {
+            let amrsUserID = loadAmrsUsers.find(user => user.uuid === kusers.uuid)?.user_id;
+            let kemrUserId = kusers.user_id;
+            this._userMap.push({ kemrUserId, amrsUserID })
+        }
+        console.log("User Map", this._userMap);
     }
 
     get userMap(): any {
