@@ -4,6 +4,7 @@ import loadPatientData, { loadPatientDataByUuid } from './load-patient-data';
 import saveVisitData from '../visits/save-visit-data';
 import { InsertedMap } from '../inserted-map';
 import insertPatientObs from '../encounters/save-obs';
+import saveProviderData, { saveProvider } from '../providers/save-provider-data';
 const CM = ConnectionManager.getInstance();
 
 export default async function transferPatientToAmrs(personId: number) {
@@ -28,6 +29,9 @@ export default async function transferPatientToAmrs(personId: number) {
         saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
 
         // console.log('saved patient', saved);
+        await saveProviderData(patient.provider,insertMap, kenyaEmrCon, amrsCon);
+        saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
+        console.log('saved patient', saved);
         await CM.rollbackTransaction(amrsCon);
     } catch (er) {
         console.error('Error saving patient:', er);

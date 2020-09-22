@@ -237,3 +237,18 @@ export type Order = {
     order_group_id: number;
     sort_weight: number; 
 };
+export type Provider = {
+    provider_id: number;
+    person_id: number;
+    name: string;
+    identifier: string;
+    creator: number;
+    date_created: Date;
+    changed_by: number;
+    date_changed: Date;
+    retired: number;
+    retired_by: number;
+    date_retired: Date;
+    retire_reason: string;
+    uuid: string;
+}
