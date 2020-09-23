@@ -1,5 +1,5 @@
-import mysql, { Connection } from "mysql";
-import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "../tables.types";
+import { Connection } from "mysql";
+import { Person, Patient } from "../tables.types";
 import { PatientData } from "./patient-data";
 import ConnectionManager from "../connection-manager";
 import UserMapper from "../users/user-map";

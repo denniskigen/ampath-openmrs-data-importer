@@ -4,6 +4,7 @@ import ConnectionManager from "../connection-manager";
 import { fetchKemrPersonProviderIds } from "./load-provider-data";
 import { InsertedMap } from "../inserted-map";
 import UserMap from "../users/user-map";
+import toInsertSql from "../prepare-insert-sql";
 
 const CM = ConnectionManager.getInstance();
 
@@ -33,21 +34,4 @@ export async function saveProvider(provider: Provider, connection:Connection,ins
 
 export function toProviderInsertStatement(provider: Provider, replaceColumns?:any) {
     return toInsertSql(provider, ['provider_id'], 'provider', replaceColumns);  
-}
-
-export function toInsertSql(obj: any, excludeColumns: string[], table: string, replaceColumns?: any) {
-    let set: any = {};
-    for (let o in obj) {
-        if (excludeColumns.includes(o)) {
-            continue;
-        }
-        if (replaceColumns[o]) {
-            set[o] = replaceColumns[o];
-        } else {
-            set[o] = obj[o];
-        }
-    }
-    const sql = mysql.format(`INSERT INTO ${table} SET ?`, [set]);
-    console.log('SQL::: ', sql);
-    return sql;
 }
