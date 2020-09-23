@@ -1,18 +1,18 @@
 const readCsv = require('./read-csv');
 
-export default class ConceptMap {
-    private static _instance: ConceptMap;
-    private _conceptMap:any;
+export default class ConceptMapper {
+    private static _instance: ConceptMapper;
+    private _conceptMap?:ConceptMap;
 
     private mappedConceptsPath = 'metadata/found.csv';
 
     private constructor() {
     }
-    static get instance(): ConceptMap {
-        if (!ConceptMap._instance) {
-            ConceptMap._instance = new ConceptMap();
+    static get instance(): ConceptMapper {
+        if (!ConceptMapper._instance) {
+            ConceptMapper._instance = new ConceptMapper();
         }
-        return ConceptMap._instance;
+        return ConceptMapper._instance;
     }
 
     async initialize() {
@@ -29,7 +29,20 @@ export default class ConceptMap {
         // console.log('Mapped Concepts', map);
     }
 
-    get conceptMap(): any {
-        return this._conceptMap;
+    get conceptMap(): ConceptMap {
+        return this._conceptMap || {};
     }
 }
+
+export type FoundConcept = {
+    concept_id:string;
+    code: string;
+    source: string;
+    datatype: string;
+    amrs_id: string;
+    amrs_datatype: string;
+}
+
+export type ConceptMap = {
+    [source_concept_id: string]: FoundConcept;
+};

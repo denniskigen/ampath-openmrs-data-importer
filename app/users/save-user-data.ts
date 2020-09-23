@@ -2,6 +2,7 @@ import mysql, { Connection } from "mysql";
 import { User } from "../tables.types";
 import ConnectionManager from "../connection-manager";
 import { UserData } from "./load-user-data";
+// import toInsertSql from "../prepare-insert-sql";
 const CM = ConnectionManager.getInstance();
 
 export default async function saveUserData(user: UserData, connection:Connection) {

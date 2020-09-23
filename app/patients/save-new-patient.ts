@@ -2,12 +2,13 @@ import mysql, { Connection } from "mysql";
 import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier } from "../tables.types";
 import { PatientData } from "./patient-data";
 import ConnectionManager from "../connection-manager";
-import UserMap from "../users/user-map";
+import UserMapper from "../users/user-map";
+import toInsertSql from "../prepare-insert-sql";
 const CM = ConnectionManager.getInstance();
 
 export default async function savePatientData(patient: PatientData, connection: Connection) {
-    await UserMap.instance.initialize();
-    return savePerson(patient, connection, UserMap.instance.userMap);
+    await UserMapper.instance.initialize();
+    return savePerson(patient, connection, UserMapper.instance.userArray);
 }
 
 export async function savePerson(patient: PatientData, connection: Connection, userMap?: any) {
@@ -30,7 +31,7 @@ export function toPersonInsertStatement(person: Person, replaceColumns?: any) {
 
 export async function savePatient(patient: PatientData, personId: number, connection: Connection) {
     console.log("user person id", personId);
-    const userMap = UserMap.instance.userMap;
+    const userMap = UserMapper.instance.userArray;
     let replaceColumns = {};
     if (userMap) {
         replaceColumns = {
@@ -47,21 +48,4 @@ export async function savePatient(patient: PatientData, personId: number, connec
 
 export function toPatientInsertStatement(patient: Patient, replaceColumns?: any) {
     return toInsertSql(patient, [''], 'patient', replaceColumns);
-}
-
-export function toInsertSql(obj: any, excludeColumns: string[], table: string, replaceColumns?: any) {
-    let set: any = {};
-    for (let o in obj) {
-        if (excludeColumns.includes(o)) {
-            continue;
-        }
-        if (replaceColumns[o]) {
-            set[o] = replaceColumns[o];
-        } else {
-            set[o] = obj[o];
-        }
-    }
-    const sql = mysql.format(`INSERT INTO ${table} SET ?`, [set]);
-    console.log('SQL::: ', sql);
-    return sql;
 }

@@ -1,14 +1,14 @@
 import mysql, { Connection } from "mysql";
 import { Visit, VisitAttribute } from "../tables.types";
 import ConnectionManager from "../connection-manager";
-import UserMap from "../users/user-map";
+import UserMapper from "../users/user-map";
 import { InsertedMap } from "../inserted-map";
 import { PatientData } from "../patients/patient-data";
 import { fetchVisitAttribute, fetchVisitAttributeByUuid } from "./load-visits-data";
 const CM = ConnectionManager.getInstance();
 
 export default async function saveVisitData(patient:PatientData,insertMap: InsertedMap, kemrCon:Connection, amrsCon:Connection) {
-    await UserMap.instance.initialize();
+    await UserMapper.instance.initialize();
     console.log("patient visits", patient.visits);
         for (const visit of patient.visits) {
             const visitAttribute = await fetchVisitAttribute(visit.visit_id, kemrCon);
@@ -18,7 +18,7 @@ export default async function saveVisitData(patient:PatientData,insertMap: Inser
                 const savedVisitAttribute = await fetchVisitAttributeByUuid(visit.uuid, kemrCon);
                 console.log("Saved visit attributes", savedVisitAttribute);
             }
-            await saveVisit(visit,insertMap.patient, insertMap, amrsCon, UserMap.instance.userMap);
+            await saveVisit(visit,insertMap.patient, insertMap, amrsCon, UserMapper.instance.userArray);
         }
 }
 
@@ -44,7 +44,7 @@ export function toVisitInsertStatement(visit: Visit, replaceColumns?:any) {
 }
 export async function saveVisitAttribute(visitAttribute: VisitAttribute,visitId:number, connection:Connection){
     
-    const userMap=UserMap.instance.userMap;
+    const userMap=UserMapper.instance.userArray;
     console.log("User Map", userMap);
     let replaceColumns = {};
     if(userMap){
