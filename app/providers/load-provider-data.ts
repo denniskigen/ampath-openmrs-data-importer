@@ -13,6 +13,11 @@ export async function fetchProvider(personId: number, connection: any) {
     let results: Provider = await con.query(sql, connection);
     return results;
 }
+export async function fetchProviders(connection: any) {
+    const sql = `select * from provider`;
+    let results: Provider[] = await con.query(sql, connection);
+    return results;
+}
 export async function fetchKemrPersonProviderIds(connection: Connection) {
     const sql = `select person_id from provider`;
     let results: any = await con.query(sql, connection);
