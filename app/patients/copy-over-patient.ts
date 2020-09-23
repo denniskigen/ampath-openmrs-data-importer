@@ -29,8 +29,6 @@ export default async function transferPatientToAmrs(personId: number) {
 
         // console.log('saved patient', saved);
         await CM.rollbackTransaction(amrsCon);
-        // const rollBack = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
-        // console.log('rollback patient', rollBack);
     } catch (er) {
         console.error('Error saving patient:', er);
         await CM.rollbackTransaction(amrsCon);
