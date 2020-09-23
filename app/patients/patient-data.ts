@@ -1,4 +1,4 @@
-import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier, Obs, Visit, Order } from "../tables.types";
+import { Person, Patient, Address, PersonName, PersonAttribute, PatientIdentifier, Obs, Visit, Provider, Order } from "../tables.types";
 
 export type PatientData = {
     person: Person;
@@ -10,4 +10,5 @@ export type PatientData = {
     obs: Obs[];
     orders: Order[];
     visits:Visit[];
+    provider: Provider;
 }

@@ -5,6 +5,7 @@ import { PatientData } from "./patient-data";
 import loadPatientObs from "../encounters/load-patient-obs";
 import loadVisitData from "../visits/load-visits-data";
 import loadPatientOrders from "../encounters/load-orders";
+import { fetchProvider } from "../providers/load-provider-data";
 const CM = ConnectionManager.getInstance();
 
 export async function loadPatientDataByUuid(personUuid: string, connection:Connection) {
@@ -22,6 +23,7 @@ export default async function loadPatientData(patientId: number, connection:Conn
     let obs = await loadPatientObs(patientId, connection);
     let visits = await loadVisitData(patientId, connection);
     let orders = await loadPatientOrders(patientId, connection); 
+    let provider = await fetchProvider(patientId, connection);
     let results: PatientData = {
         person: person,
         patient: patient,
@@ -31,7 +33,8 @@ export default async function loadPatientData(patientId: number, connection:Conn
         identifiers:identifiers,
         obs: obs,
         orders: orders,
-        visits:visits
+        visits:visits,
+        provider:provider
     };
     return results;
 }
