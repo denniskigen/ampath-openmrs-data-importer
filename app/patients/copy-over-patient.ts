@@ -22,7 +22,8 @@ export default async function transferPatientToAmrs(personId: number) {
         let insertMap: InsertedMap = {
             patient: saved.person.person_id,
             visits: {},
-            encounters: {}
+            encounters: {},
+            obs: {}
         };
         await saveVisitData(patient, insertMap, kenyaEmrCon, amrsCon);
         await insertPatientObs(patient.obs, patient,insertMap,amrsCon);

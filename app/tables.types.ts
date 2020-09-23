@@ -139,6 +139,7 @@ export type User = {
 
 export type Obs = {
     obs_id: number;
+    amrs_obs_id: number;
     person_id: number;
     concept_id: number;
     encounter_id: number;

@@ -13,13 +13,32 @@ export default async function insertPatientObs(obsToInsert: Obs[], patient: Pati
     await ConceptMapper.instance.initialize();
     await UserMapper.instance.initialize();
     let obs = prepareObs(obsToInsert, ConceptMapper.instance);
-    console.log(insertMap);
-    await saveObs(obs,obsToInsert,insertMap.patient,insertMap.encounters, connection);
+    let map = await saveObs(obs,obsToInsert,insertMap.patient,insertMap.encounters, connection);
+    insertMap.obs = map;
+    // console.log(insertMap);
+    await updateObsGroupIds(obsToInsert, insertMap,connection);
 }
 
 export type ObsMap = {
     [kenyaEmrObsId:number]:number
 };
+
+export async function updateObsGroupIds(sourceObs:Obs[], insertMap:InsertedMap, connection:Connection) {
+    sourceObs.forEach(async (obs)=>{
+        if(obs.obs_group_id) {
+            if(!insertMap.obs[obs.obs_group_id]) {
+                console.warn('Parent obs id is missing from the insert map. Skipping updating of obs_group_id. Details:', obs);
+                return; // TODO throw error instead of returning
+            }
+
+            if(!obs.amrs_obs_id) {
+                console.warn('Obs was not inserted in AMRS. Skipping updates. Details:', obs);
+                return; // TODO throw error instead of returning
+            }
+            await CM.query(toObsGroupIdUpdateStatement(obs.amrs_obs_id, insertMap.obs[obs.obs_group_id]), connection);
+        }
+    });
+}
 
 export async function saveObs(mappedObs: Obs[], sourceObs:Obs[], newPatientId:number, encounterMap:any, connection:Connection) {
     let obsMap:ObsMap = {};
@@ -35,6 +54,7 @@ export async function saveObs(mappedObs: Obs[], sourceObs:Obs[], newPatientId:nu
         // console.log('sql', sql);
         const results = await CM.query(sql, connection); // TODO save once encounters are ready
         obsMap[sourceObs[i].obs_id] = results.insertId;
+        sourceObs[i].amrs_obs_id = results.insertId;
     }
     console.log('Skipped obs count ' + skippedObsCount + '/' + sourceObs.length);
     return obsMap;
@@ -53,10 +73,14 @@ export function toObsInsertStatement(obs: Obs, sourceObs:Obs, newPatientId:numbe
         'value_coded_name_id': null, //TODO replace with value_coded_name_id
         'previous_version': null, //TODO replace with previous_version
     };
-    return toInsertSql(obs, ['obs_id', 'value_boolean'], 'obs', replaceColumns);
+    return toInsertSql(obs, ['obs_id', 'amrs_obs_id', 'value_boolean'], 'obs', replaceColumns);
 }
 
-
+export function toObsGroupIdUpdateStatement(obsId:number, obsGroupId:number){
+    let sql = `UPDATE obs SET obs_group_id = ${obsGroupId} where obs_id = ${obsId}`;
+    console.log('SQL:::', sql);
+    return sql;
+}
 
 export function prepareObs(obsToInsert: Obs[], conceptMap: ConceptMapper): Obs[] {
     // replace concept ids with maps and convert to destination concept values
