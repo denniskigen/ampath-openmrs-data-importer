@@ -23,8 +23,8 @@ export async function fetchVisitAttribute(visitId: number, connection: any) {
     let results: VisitAttribute[] = await con.query(sql, connection);
     return results[0];
 }
-export async function fetchVisitAttributeByUuid(visitId: string, connection: any) {
-    const sql = `select * from visit_attribute where uuid= ${visitId}`;
+export async function fetchVisitAttributeByUuid(attributeUuid: string, connection: any) {
+    const sql = `select * from visit_attribute where uuid = '${attributeUuid}'`;
     let results: VisitAttribute[] = await con.query(sql, connection);
     return results[0];
 }
