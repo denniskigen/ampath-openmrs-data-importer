@@ -16,7 +16,8 @@ export default async function savePatientOrders(ordersToInsert: Order[], patient
     await ProviderMapper.instance.initialize();
     let orders = prepareOrders(ordersToInsert, ConceptMapper.instance);
     // console.log(insertMap);
-    await saveOrder(orders,ordersToInsert,insertMap.patient,insertMap.encounters, ProviderMapper.instance.providerMap, connection);
+    let map = await saveOrder(orders,ordersToInsert,insertMap.patient,insertMap.encounters, ProviderMapper.instance.providerMap, connection);
+    insertMap.orders = map;
 }
 
 export type OrderMap = {
@@ -80,7 +81,7 @@ export function assertOrderConceptsAreMapped(order:Order, conceptMap: ConceptMap
     }
 
     if(order.order_reason && !conceptMap[order.order_reason]) {
-        // throw new Error('Unmapped concept detected. Concept ID: ' + order.order_reason);
+        throw new Error('Unmapped concept detected. Concept ID: ' + order.order_reason);
     }
 }
 

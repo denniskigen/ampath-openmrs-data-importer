@@ -63,9 +63,8 @@ export async function saveObs(mappedObs: Obs[], sourceObs:Obs[], newPatientId:nu
 }
 
 export function toObsInsertStatement(obs: Obs, sourceObs:Obs, newPatientId:number, userMap:any, encounterMap:any, orderMap:OrderMap) {
-    if(sourceObs.order_id) {
-
-    console.log('updating source obs', orderMap[sourceObs.order_id] );
+    if(sourceObs.order_id && !orderMap[sourceObs.order_id]) {
+        console.warn(` Order ID ${sourceObs.order_id} not found. Required by obs id ${sourceObs.obs_id}` );
     }
     let replaceColumns = {
         'creator': userMap[sourceObs.creator],
