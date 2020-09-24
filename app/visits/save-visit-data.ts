@@ -18,7 +18,7 @@ export default async function saveVisitData(patient:PatientData,insertMap: Inser
                 const savedVisitAttribute = await fetchVisitAttributeByUuid(visit.uuid, kemrCon);
                 console.log("Saved visit attributes", savedVisitAttribute);
             }
-            await saveVisit(visit,insertMap.patient, insertMap, amrsCon, UserMapper.instance.userArray);
+            await saveVisit(visit,insertMap.patient, insertMap, amrsCon, UserMapper.instance.userMap);
         }
 }
 
@@ -26,9 +26,9 @@ export async function saveVisit(visit: Visit,patientId: number, insertMap: Inser
     let replaceColumns = {};
     if(userMap){
          replaceColumns = {
-            creator: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === visit.creator )?.amrsUserID,
-            changed_by: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === visit.changed_by )?.amrsUserID,
-            voided_by: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === visit.voided_by )?.amrsUserID,
+            creator: userMap[visit.creator],
+            changed_by: userMap[visit.changed_by],
+            voided_by: userMap[visit.voided_by],
             patient_id:patientId,
             location_id: 214
         };

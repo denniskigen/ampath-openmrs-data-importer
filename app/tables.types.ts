@@ -236,7 +236,7 @@ export type Order = {
     care_setting: number;
     scheduled_date: Date;
     order_group_id: number;
-    sort_weight: number; 
+    sort_weight: number;
 };
 export type Provider = {
     provider_id: number;
@@ -276,4 +276,18 @@ export type Encounter = {
     visit_id: number;
     uuid: string;
 
+}
+export type EncounterProvider = {
+    encounter_id: number;
+    provider_id: number;
+    encounter_role_id: number;
+    creator: number;
+    date_created: Date
+    changed_by: number;
+    date_changed: Date
+    voided: number;
+    date_voided: Date
+    voided_by: number;
+    void_reason: string
+    uuid: string
 }
