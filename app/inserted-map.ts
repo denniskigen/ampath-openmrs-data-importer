@@ -1,4 +1,5 @@
 import { ObsMap } from "./encounters/save-obs";
+import { OrderMap } from "./encounters/save-orders";
 
 export type InsertedMap = {
     patient: number;
@@ -8,5 +9,6 @@ export type InsertedMap = {
     encounters: {
         [kenyaEmrId:number]:number;
     }
-    obs: ObsMap
+    obs: ObsMap,
+    orders: OrderMap
 };

@@ -9,7 +9,7 @@ import { InsertedMap } from "../inserted-map";
 
 const CM = ConnectionManager.getInstance();
 
-export default async function insertPatientObs(obsToInsert: Obs[], patient: PatientData, insertMap:InsertedMap, connection:Connection) {
+export default async function savePatientObs(obsToInsert: Obs[], patient: PatientData, insertMap:InsertedMap, connection:Connection) {
     await ConceptMapper.instance.initialize();
     await UserMapper.instance.initialize();
     let obs = prepareObs(obsToInsert, ConceptMapper.instance);

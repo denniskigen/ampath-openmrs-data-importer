@@ -3,9 +3,10 @@ import savePatientData, { savePatient } from './save-new-patient';
 import loadPatientData, { loadPatientDataByUuid } from './load-patient-data';
 import saveVisitData from '../visits/save-visit-data';
 import { InsertedMap } from '../inserted-map';
-import insertPatientObs from '../encounters/save-obs';
+import savePatientObs from '../encounters/save-obs';
 import saveProviderData, { saveProvider } from '../providers/save-provider-data';
 import saveEncounterData, { saveEncounterProviderData } from '../encounters/save-encounters';
+import savePatientOrders from '../encounters/save-orders';
 const CM = ConnectionManager.getInstance();
 
 export default async function transferPatientToAmrs(personId: number) {
@@ -24,15 +25,16 @@ export default async function transferPatientToAmrs(personId: number) {
             patient: saved.person.person_id,
             visits: {},
             encounters: {},
-            obs: {}
+            obs: {},
+            orders: {}
         };
         await saveVisitData(patient, insertMap, kenyaEmrCon, amrsCon);
         await saveEncounterData(patient.encounter,insertMap,amrsCon);
-        await insertPatientObs(patient.obs, patient,insertMap,amrsCon);
-        saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
+        await savePatientOrders(patient.orders, patient, insertMap, amrsCon);
+        await savePatientObs(patient.obs, patient, insertMap, amrsCon);
         await saveProviderData(patient.provider,insertMap, kenyaEmrCon, amrsCon);
         saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
-        console.log('saved patient', saved);
+        // console.log('saved patient', saved);
         await CM.rollbackTransaction(amrsCon);
     } catch (er) {
         console.error('Error saving patient:', er);
