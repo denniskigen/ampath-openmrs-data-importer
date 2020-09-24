@@ -49,7 +49,7 @@ export function toOrdersInsertStatement(order: Order, sourceOrder:Order, newPati
         'creator': userMap[sourceOrder.creator],
         'voided_by': userMap[sourceOrder.voided_by],
         'orderer': providerMap[sourceOrder.orderer],
-        'order_reason': null,
+        'order_reason': providerMap[sourceOrder.orderer],
         'patient_id': newPatientId,
         'encounter_id': encounterMap[sourceOrder.encounter_id] || null,
         'previous_order_id': null, //TODO replace with previous_version
