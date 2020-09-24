@@ -209,6 +209,7 @@ export type VisitAttribute = {
 
 export type Order = {
     order_id: number;
+    amrs_order_id: number;
     order_type_id: number;
     concept_id: number;
     orderer: number;

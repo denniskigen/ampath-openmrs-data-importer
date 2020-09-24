@@ -6,50 +6,54 @@ import { Order } from "../tables.types";
 import { PatientData } from "../patients/patient-data";
 import toInsertSql from "../prepare-insert-sql";
 import { InsertedMap } from "../inserted-map";
+import ProviderMapper from "../providers/provider-map";
 
 const CM = ConnectionManager.getInstance();
 
-export default async function insertPatientOrders(ordersToInsert: Order[], patient: PatientData, insertMap:InsertedMap, connection:Connection) {
+export default async function savePatientOrders(ordersToInsert: Order[], patient: PatientData, insertMap:InsertedMap, connection:Connection) {
     await ConceptMapper.instance.initialize();
     await UserMapper.instance.initialize();
+    await ProviderMapper.instance.initialize();
     let orders = prepareOrders(ordersToInsert, ConceptMapper.instance);
-    // console.log(insertMap);
-    await saveObs(orders,ordersToInsert,insertMap.patient,insertMap.encounters, connection);
+    console.log(insertMap);
+    // process.exit(0);
+    await saveOrder(orders,ordersToInsert,insertMap.patient,insertMap.encounters, ProviderMapper.instance.providerMap, connection);
 }
 
-export type ObsMap = {
-    [kenyaEmrObsId:number]:number
+export type OrderMap = {
+    [kenyaEmrOrderId:number]:number
 };
 
-export async function saveObs(mappedOrders: Order[], sourceOrders:Order[], newPatientId:number, encounterMap:any, providerMap:any, connection:Connection) {
-    let obsMap:ObsMap = {};
+export async function saveOrder(mappedOrders: Order[], sourceOrders:Order[], newPatientId:number, encounterMap:any, providerMap:any, connection:Connection) {
+    let orderMap:OrderMap = {};
     let skippedObsCount = 0;
     for(var i = 0; i < mappedOrders.length; i++) {
         if(mappedOrders[i].comment_to_fulfiller === 'invalid') {
             // skip it
-            console.warn('skipping obs for concept: ', sourceOrders[i].concept_id);
+            console.warn('skipping order for concept: ', sourceOrders[i].concept_id);
             skippedObsCount++;
             continue;
         }
-        const sql = toOrdersInsertStatement(mappedOrders[i], sourceOrders[i], newPatientId, UserMapper.instance.userMap, encounterMap);
+        const sql = toOrdersInsertStatement(mappedOrders[i], sourceOrders[i], newPatientId, UserMapper.instance.userMap, encounterMap, providerMap);
         // console.log('sql', sql);
         const results = await CM.query(sql, connection); // TODO save once encounters are ready
-        obsMap[sourceOrders[i].order_id] = results.insertId;
+        orderMap[sourceOrders[i].order_id] = results.insertId;
+        sourceOrders[i].amrs_order_id = results.insertId;
     }
-    console.log('Skipped obs count ' + skippedObsCount + '/' + sourceOrders.length);
-    return obsMap;
+    console.log('Skipped orders count ' + skippedObsCount + '/' + sourceOrders.length);
+    return orderMap;
 }
 
-export function toOrdersInsertStatement(order: Order, sourceObs:Order, newPatientId:number, userMap:any, encounterMap:any) {
+export function toOrdersInsertStatement(order: Order, sourceObs:Order, newPatientId:number, userMap:any, encounterMap:any, providerMap:any) {
     let replaceColumns = {
         'creator': userMap[sourceObs.creator],
         'voided_by': userMap[sourceObs.voided_by],
-        'order':
+        'orderer': providerMap[sourceObs.orderer],
         'patient_id': newPatientId,
         'encounter_id': encounterMap[sourceObs.encounter_id] || null,
         'previous_order_id': null, //TODO replace with previous_version
     };
-    return toInsertSql(order, ['order_id', ], 'obs', replaceColumns);
+    return toInsertSql(order, ['order_id', ], 'orders', replaceColumns);
 }
 
 export function prepareOrders(ordersToInsert: Order[], conceptMap: ConceptMapper): Order[] {
@@ -58,7 +62,7 @@ export function prepareOrders(ordersToInsert: Order[], conceptMap: ConceptMapper
     let orders:Order[] = ordersToInsert.map<Order>((o,i,A):Order=>{
         let newOrder:Order = Object.assign({},o);
         try { // TODO, to remove this before moving running in production
-            assertObsConceptsAreMapped(o, conceptMap.conceptMap);
+            assertOrderConceptsAreMapped(o, conceptMap.conceptMap);
             mapOrderConcept(newOrder,o, conceptMap.conceptMap);
             mapOrderReasonConcept(newOrder,o, conceptMap.conceptMap);
         } catch (err) {
@@ -70,7 +74,7 @@ export function prepareOrders(ordersToInsert: Order[], conceptMap: ConceptMapper
     return orders;
 }
 
-export function assertObsConceptsAreMapped(order:Order, conceptMap: ConceptMap) {
+export function assertOrderConceptsAreMapped(order:Order, conceptMap: ConceptMap) {
     if(!conceptMap[order.concept_id]) {
         throw new Error('Unmapped concept detected. Concept ID: ' + order.concept_id);
     }
