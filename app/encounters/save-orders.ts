@@ -25,12 +25,12 @@ export type OrderMap = {
 
 export async function saveOrder(mappedOrders: Order[], sourceOrders:Order[], newPatientId:number, encounterMap:any, providerMap:any, connection:Connection) {
     let orderMap:OrderMap = {};
-    let skippedObsCount = 0;
+    let skippedOrderCount = 0;
     for(var i = 0; i < mappedOrders.length; i++) {
         if(mappedOrders[i].comment_to_fulfiller === 'invalid') {
             // skip it
             console.warn('skipping order for concept: ', sourceOrders[i].concept_id);
-            skippedObsCount++;
+            skippedOrderCount++;
             continue;
         }
         const sql = toOrdersInsertStatement(mappedOrders[i], sourceOrders[i], newPatientId, UserMapper.instance.userMap, encounterMap, providerMap);
@@ -39,17 +39,17 @@ export async function saveOrder(mappedOrders: Order[], sourceOrders:Order[], new
         orderMap[sourceOrders[i].order_id] = results.insertId;
         sourceOrders[i].amrs_order_id = results.insertId;
     }
-    console.log('Skipped orders count ' + skippedObsCount + '/' + sourceOrders.length);
+    console.log('Skipped orders count ' + skippedOrderCount + '/' + sourceOrders.length);
     return orderMap;
 }
 
-export function toOrdersInsertStatement(order: Order, sourceObs:Order, newPatientId:number, userMap:any, encounterMap:any, providerMap:any) {
+export function toOrdersInsertStatement(order: Order, sourceOrder:Order, newPatientId:number, userMap:any, encounterMap:any, providerMap:any) {
     let replaceColumns = {
-        'creator': userMap[sourceObs.creator],
-        'voided_by': userMap[sourceObs.voided_by],
-        'orderer': providerMap[sourceObs.orderer],
+        'creator': userMap[sourceOrder.creator],
+        'voided_by': userMap[sourceOrder.voided_by],
+        'orderer': providerMap[sourceOrder.orderer],
         'patient_id': newPatientId,
-        'encounter_id': encounterMap[sourceObs.encounter_id] || null,
+        'encounter_id': encounterMap[sourceOrder.encounter_id] || null,
         'previous_order_id': null, //TODO replace with previous_version
     };
     return toInsertSql(order, ['order_id', ], 'orders', replaceColumns);
