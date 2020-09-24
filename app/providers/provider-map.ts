@@ -37,7 +37,7 @@ export default class ProviderMapper {
                 this._providerMap[kemrUserId] = amrsUserID;
             }
         }
-        console.log("Provider Map", this._providerArray);
+        console.log("Provider Map", this._providerMap);
     }
 
     get providerMap(): ProviderMap {

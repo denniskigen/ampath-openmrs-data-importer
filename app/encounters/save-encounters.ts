@@ -6,26 +6,28 @@ import toInsertSql from "../prepare-insert-sql";
 import { InsertedMap } from "../inserted-map";
 import { fetchEncounterProviders, fetchEncounterType } from "./load-encounters";
 import ProviderMapper from "../providers/provider-map";
+import FormMapper from "./form-map";
 
 const CM = ConnectionManager.getInstance();
 
 export default async function saveEncounterData(encounters: Encounter[], insertMap: InsertedMap, connection: Connection) {
     //Todo add form mapper
     await UserMapper.instance.initialize();
+    await FormMapper.instance.initialize();
     return saveEncounter(encounters, connection, insertMap, UserMapper.instance.userMap);
 }
 export async function saveEncounter(encounter: Encounter[], connection: Connection, insertMap: InsertedMap, userMap?: any) {
     let replaceColumns = {};
     for (const enc of encounter) {
         const encounterTypeId = await fetchEncounterType(enc.encounter_type, connection);
-        console.log(encounterTypeId);
+        console.log("Mapped", FormMapper.instance.formMap[enc.form_id]);
         if (userMap) {
             replaceColumns = {
                 creator: userMap[enc.creator],
                 changed_by: userMap[enc.changed_by],
                 voided_by: userMap[enc.voided_by],
                 encounter_type: encounterTypeId.uuid,
-                form_id: 1, //ToDo replace with form id mapper
+                form_id: 1,//FormMapper.instance.formMap[enc.form_id],
                 visit_id: insertMap.visits[enc.visit_id],
                 location_id: 214,
                 patient_id: insertMap.patient
