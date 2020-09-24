@@ -15,8 +15,7 @@ export default async function savePatientOrders(ordersToInsert: Order[], patient
     await UserMapper.instance.initialize();
     await ProviderMapper.instance.initialize();
     let orders = prepareOrders(ordersToInsert, ConceptMapper.instance);
-    console.log(insertMap);
-    // process.exit(0);
+    // console.log(insertMap);
     await saveOrder(orders,ordersToInsert,insertMap.patient,insertMap.encounters, ProviderMapper.instance.providerMap, connection);
 }
 
