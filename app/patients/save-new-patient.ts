@@ -4,20 +4,21 @@ import { PatientData } from "./patient-data";
 import ConnectionManager from "../connection-manager";
 import UserMapper from "../users/user-map";
 import toInsertSql from "../prepare-insert-sql";
+
 const CM = ConnectionManager.getInstance();
 
 export default async function savePatientData(patient: PatientData, connection: Connection) {
     await UserMapper.instance.initialize();
-    return savePerson(patient, connection, UserMapper.instance.userArray);
+    return savePerson(patient, connection, UserMapper.instance.userMap);
 }
 
 export async function savePerson(patient: PatientData, connection: Connection, userMap?: any) {
     let replaceColumns = {};
     if (userMap) {
         replaceColumns = {
-            creator: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === patient.person.creator)?.amrsUserID,
-            changed_by: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === patient.person.changed_by)?.amrsUserID,
-            voided_by: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === patient.person.voided_by)?.amrsUserID,
+            creator: userMap[patient.person.creator],
+            changed_by: userMap[patient.person.changed_by],
+            voided_by: userMap[patient.person.voided_by]
         };
     }
 
@@ -31,13 +32,13 @@ export function toPersonInsertStatement(person: Person, replaceColumns?: any) {
 
 export async function savePatient(patient: PatientData, personId: number, connection: Connection) {
     console.log("user person id", personId);
-    const userMap = UserMapper.instance.userArray;
+    const userMap = UserMapper.instance.userMap;
     let replaceColumns = {};
     if (userMap) {
         replaceColumns = {
-            creator: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === patient.patient.creator)?.amrsUserID,
-            changed_by: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === patient.patient.changed_by)?.amrsUserID,
-            voided_by: userMap.find((user: { kemrUserId: number; }) => user.kemrUserId === patient.patient.voided_by)?.amrsUserID,
+            creator: userMap[patient.person.creator],
+            changed_by: userMap[patient.person.changed_by],
+            voided_by: userMap[patient.person.voided_by],
             patient_id: personId
         };
     }

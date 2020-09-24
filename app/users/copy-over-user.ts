@@ -4,6 +4,7 @@ import saveUserData from './save-user-data';
 import loadPatientData, { fetchPerson, loadPatientDataByUuid } from '../patients/load-patient-data';
 import { savePerson } from '../patients/save-new-patient';
 import UserMapper from './user-map';
+
 const CM = ConnectionManager.getInstance();
 
 export default async function transferUserToAmrs(userId: number) {

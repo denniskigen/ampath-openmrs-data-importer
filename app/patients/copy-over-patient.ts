@@ -5,6 +5,7 @@ import saveVisitData from '../visits/save-visit-data';
 import { InsertedMap } from '../inserted-map';
 import insertPatientObs from '../encounters/save-obs';
 import saveProviderData, { saveProvider } from '../providers/save-provider-data';
+import saveEncounterData, { saveEncounterProviderData } from '../encounters/save-encounters';
 const CM = ConnectionManager.getInstance();
 
 export default async function transferPatientToAmrs(personId: number) {
@@ -26,10 +27,9 @@ export default async function transferPatientToAmrs(personId: number) {
             obs: {}
         };
         await saveVisitData(patient, insertMap, kenyaEmrCon, amrsCon);
+        await saveEncounterData(patient.encounter,insertMap,amrsCon);
         await insertPatientObs(patient.obs, patient,insertMap,amrsCon);
         saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
-
-        // console.log('saved patient', saved);
         await saveProviderData(patient.provider,insertMap, kenyaEmrCon, amrsCon);
         saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
         console.log('saved patient', saved);
