@@ -32,6 +32,7 @@ export async function saveEncounter(encounter: Encounter[], connection: Connecti
             };
         }
         const savedEncounter = await CM.query(toEncounterInsertStatement(enc, replaceColumns), connection);
+        insertMap.encounters[enc.encounter_id] = savedEncounter.insertId;
         await saveEncounterProviderData(enc,savedEncounter.encounter_id, connection, userMap);
 
     }
