@@ -29,7 +29,7 @@ export async function saveOrder(mappedOrders: Order[], sourceOrders:Order[], new
     for(var i = 0; i < mappedOrders.length; i++) {
         if(mappedOrders[i].comment_to_fulfiller === 'invalid') {
             // skip it
-            console.warn('skipping order for concept: ', sourceOrders[i].concept_id);
+            console.warn('skipping order for concept: ', sourceOrders[i].concept_id, sourceOrders[i].order_reason);
             skippedOrderCount++;
             continue;
         }
@@ -48,6 +48,7 @@ export function toOrdersInsertStatement(order: Order, sourceOrder:Order, newPati
         'creator': userMap[sourceOrder.creator],
         'voided_by': userMap[sourceOrder.voided_by],
         'orderer': providerMap[sourceOrder.orderer],
+        'order_reason': null,
         'patient_id': newPatientId,
         'encounter_id': encounterMap[sourceOrder.encounter_id] || null,
         'previous_order_id': null, //TODO replace with previous_version
@@ -79,7 +80,7 @@ export function assertOrderConceptsAreMapped(order:Order, conceptMap: ConceptMap
     }
 
     if(order.order_reason && !conceptMap[order.order_reason]) {
-        throw new Error('Unmapped concept detected. Concept ID: ' + order.order_reason);
+        // throw new Error('Unmapped concept detected. Concept ID: ' + order.order_reason);
     }
 }
 

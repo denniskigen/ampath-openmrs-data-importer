@@ -45,7 +45,7 @@ export default async function loadPatientData(patientId: number, connection:Conn
 export async function fetchPersonIdByUuid(personUuid: string, connection: Connection) {
     const sql = `select person_id from person where uuid= '${personUuid}'`;
     let results:any[] = await CM.query(sql, connection);
-    console.log('persons with uuid', results);
+    // console.log('persons with uuid', results);
     return  results.length > 0 ? results[0]['person_id'] as number : -1;
 }
 

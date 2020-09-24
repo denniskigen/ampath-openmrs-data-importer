@@ -9,14 +9,14 @@ const CM = ConnectionManager.getInstance();
 
 export default async function saveVisitData(patient:PatientData,insertMap: InsertedMap, kemrCon:Connection, amrsCon:Connection) {
     await UserMapper.instance.initialize();
-    console.log("patient visits", patient.visits);
+    // console.log("patient visits", patient.visits);
         for (const visit of patient.visits) {
             const visitAttribute = await fetchVisitAttribute(visit.visit_id, kemrCon);
-            console.log("Visit attributes", visitAttribute);
+            // console.log("Visit attributes", visitAttribute);
             if(visitAttribute){
                 await saveVisitAttribute(visitAttribute,insertMap.visits[visit.visit_id],amrsCon);
                 const savedVisitAttribute = await fetchVisitAttributeByUuid(visit.uuid, kemrCon);
-                console.log("Saved visit attributes", savedVisitAttribute);
+                // console.log("Saved visit attributes", savedVisitAttribute);
             }
             await saveVisit(visit,insertMap.patient, insertMap, amrsCon, UserMapper.instance.userMap);
         }
@@ -35,7 +35,7 @@ export async function saveVisit(visit: Visit,patientId: number, insertMap: Inser
     }
    
     const results = await CM.query(toVisitInsertStatement(visit, replaceColumns), connection);
-    console.log("Insert ID", results.insertId);
+    // console.log("Insert ID", results.insertId);
     insertMap.visits[visit.visit_id] = results.insertId;
 }
 
@@ -45,7 +45,7 @@ export function toVisitInsertStatement(visit: Visit, replaceColumns?:any) {
 export async function saveVisitAttribute(visitAttribute: VisitAttribute,visitId:number, connection:Connection){
     
     const userMap=UserMapper.instance.userArray;
-    console.log("User Map", userMap);
+    // console.log("User Map", userMap);
     let replaceColumns = {};
     if(userMap){
          replaceColumns = {

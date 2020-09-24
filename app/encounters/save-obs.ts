@@ -6,6 +6,7 @@ import { Obs } from "../tables.types";
 import { PatientData } from "../patients/patient-data";
 import toInsertSql from "../prepare-insert-sql";
 import { InsertedMap } from "../inserted-map";
+import { OrderMap } from "./save-orders";
 
 const CM = ConnectionManager.getInstance();
 
@@ -13,7 +14,7 @@ export default async function savePatientObs(obsToInsert: Obs[], patient: Patien
     await ConceptMapper.instance.initialize();
     await UserMapper.instance.initialize();
     let obs = prepareObs(obsToInsert, ConceptMapper.instance);
-    let map = await saveObs(obs,obsToInsert,insertMap.patient,insertMap.encounters, connection);
+    let map = await saveObs(obs,obsToInsert,insertMap.patient,insertMap.encounters,insertMap.orders, connection);
     insertMap.obs = map;
     // console.log(insertMap);
     await updateObsGroupIds(obsToInsert, insertMap,connection);
@@ -27,7 +28,8 @@ export async function updateObsGroupIds(sourceObs:Obs[], insertMap:InsertedMap, 
     sourceObs.forEach(async (obs)=>{
         if(obs.obs_group_id) {
             if(!insertMap.obs[obs.obs_group_id]) {
-                console.warn('Parent obs id is missing from the insert map. Skipping updating of obs_group_id. Details:', obs);
+                console.warn('Parent obs id is missing from the insert map. Skipping updating of obs_group_id.', obs.obs_group_id);
+                // console.warn('Details:', obs);
                 return; // TODO throw error instead of returning
             }
 
@@ -40,7 +42,7 @@ export async function updateObsGroupIds(sourceObs:Obs[], insertMap:InsertedMap, 
     });
 }
 
-export async function saveObs(mappedObs: Obs[], sourceObs:Obs[], newPatientId:number, encounterMap:any, connection:Connection) {
+export async function saveObs(mappedObs: Obs[], sourceObs:Obs[], newPatientId:number, encounterMap:any,  orderMap:OrderMap, connection:Connection) {
     let obsMap:ObsMap = {};
     let skippedObsCount = 0;
     for(var i = 0; i < mappedObs.length; i++) {
@@ -50,7 +52,7 @@ export async function saveObs(mappedObs: Obs[], sourceObs:Obs[], newPatientId:nu
             skippedObsCount++;
             continue;
         }
-        const sql = toObsInsertStatement(mappedObs[i], sourceObs[i], newPatientId, UserMapper.instance.userMap, encounterMap);
+        const sql = toObsInsertStatement(mappedObs[i], sourceObs[i], newPatientId, UserMapper.instance.userMap, encounterMap, orderMap);
         // console.log('sql', sql);
         const results = await CM.query(sql, connection); // TODO save once encounters are ready
         obsMap[sourceObs[i].obs_id] = results.insertId;
@@ -60,16 +62,20 @@ export async function saveObs(mappedObs: Obs[], sourceObs:Obs[], newPatientId:nu
     return obsMap;
 }
 
-export function toObsInsertStatement(obs: Obs, sourceObs:Obs, newPatientId:number, userMap:any, encounterMap:any) {
+export function toObsInsertStatement(obs: Obs, sourceObs:Obs, newPatientId:number, userMap:any, encounterMap:any, orderMap:OrderMap) {
+    if(sourceObs.order_id) {
+
+    console.log('updating source obs', orderMap[sourceObs.order_id] );
+    }
     let replaceColumns = {
         'creator': userMap[sourceObs.creator],
         'voided_by': userMap[sourceObs.voided_by],
         'person_id': newPatientId,
         'encounter_id': encounterMap[sourceObs.encounter_id] || null,
         'location_id': 1, //TODO replace with kapenguria location id,
-        'order_id': null, //TODO replace with order map,
+        'order_id': orderMap[sourceObs.order_id] || null,
         'status': 'FINAL',
-        'obs_group_id': null, //TODO update with obs group id
+        'obs_group_id': null,
         'value_coded_name_id': null, //TODO replace with value_coded_name_id
         'previous_version': null, //TODO replace with previous_version
     };
