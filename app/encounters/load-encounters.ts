@@ -74,13 +74,13 @@ export async function loadFormMap() {
         51: "7756aa93-a353-4aff-8320-c06fb62369f5",
         52: "0fe3de0b-ae29-4ada-ae89-24f4b023b675",
         53: "1d91ca55-dccf-4c59-b080-bc5e22542fc7",
-        50: "", // Todo add form metadata for drug regimen editor
-        45:""// Todo add form metadata for drug order
+        50: "1d91ca55-dccf-4c59-b080-bc5e22542fc7", // Todo add form metadata for drug regimen editor
+        45: "1d91ca55-dccf-4c59-b080-bc5e22542fc7"// Todo add form metadata for drug order
     }
 }
 export async function loadEncounterFormsByUuid(formUuid: string, connection: Connection) {
     const sql = `select form_id from form where uuid='${formUuid}'`;
     let results: any = await CM.query(sql, connection);
     console.log('encounter with id', results);
-    return results[0];
+    return results.length > 0 ? results[0] : null;
 }
