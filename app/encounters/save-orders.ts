@@ -16,7 +16,8 @@ export default async function savePatientOrders(ordersToInsert: Order[], patient
     await ProviderMapper.instance.initialize();
     let orders = prepareOrders(ordersToInsert, ConceptMapper.instance);
     // console.log(insertMap);
-    await saveOrder(orders,ordersToInsert,insertMap.patient,insertMap.encounters, ProviderMapper.instance.providerMap, connection);
+    let map = await saveOrder(orders,ordersToInsert,insertMap.patient,insertMap.encounters, ProviderMapper.instance.providerMap, connection);
+    insertMap.orders = map;
 }
 
 export type OrderMap = {
@@ -29,7 +30,7 @@ export async function saveOrder(mappedOrders: Order[], sourceOrders:Order[], new
     for(var i = 0; i < mappedOrders.length; i++) {
         if(mappedOrders[i].comment_to_fulfiller === 'invalid') {
             // skip it
-            console.warn('skipping order for concept: ', sourceOrders[i].concept_id);
+            console.warn('skipping order for concept: ', sourceOrders[i].concept_id, sourceOrders[i].order_reason);
             skippedOrderCount++;
             continue;
         }
@@ -48,6 +49,7 @@ export function toOrdersInsertStatement(order: Order, sourceOrder:Order, newPati
         'creator': userMap[sourceOrder.creator],
         'voided_by': userMap[sourceOrder.voided_by],
         'orderer': providerMap[sourceOrder.orderer],
+        'order_reason': providerMap[sourceOrder.orderer],
         'patient_id': newPatientId,
         'encounter_id': encounterMap[sourceOrder.encounter_id] || null,
         'previous_order_id': null, //TODO replace with previous_version

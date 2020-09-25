@@ -18,7 +18,7 @@ export async function saveEncounter(encounter: Encounter[], connection: Connecti
     let replaceColumns = {};
     for (const enc of encounter) {
         const encounterTypeId = await fetchEncounterType(enc.encounter_type, connection);
-        console.log(encounterTypeId);
+        // console.log(encounterTypeId);
         if (userMap) {
             replaceColumns = {
                 creator: userMap[enc.creator],
@@ -40,7 +40,7 @@ export async function saveEncounter(encounter: Encounter[], connection: Connecti
 export async function saveEncounterProviderData(enc: Encounter, encounterId:number, connection: Connection, userMap?: any) {
     const EncounterProviders = await fetchEncounterProviders(enc.encounter_id, connection);
     await ProviderMapper.instance.initialize();
-    console.log("Inserting encounter providers", EncounterProviders);
+    // console.log("Inserting encounter providers", EncounterProviders);
     let replaceColumns = {};
     for(const enc_provider of EncounterProviders){
         const providerId = ProviderMapper.instance.providerMap[enc_provider.provider_id]
