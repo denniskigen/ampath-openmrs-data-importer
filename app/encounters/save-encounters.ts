@@ -27,7 +27,7 @@ export async function saveEncounter(encounter: Encounter[], connection: Connecti
                 changed_by: userMap[enc.changed_by],
                 voided_by: userMap[enc.voided_by],
                 encounter_type: encounterTypeId.uuid,
-                form_id: 1,//FormMapper.instance.formMap[enc.form_id],
+                form_id: FormMapper.instance.formMap[enc.form_id],
                 visit_id: insertMap.visits[enc.visit_id],
                 location_id: 214,
                 patient_id: insertMap.patient

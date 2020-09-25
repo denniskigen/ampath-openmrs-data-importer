@@ -30,8 +30,9 @@ export default class FormMapper {
         for (const [key, value] of Object.entries(loadKemrAmrsMapping)) {
 
             const loadAmrsFormsIdByUuid = await loadEncounterFormsByUuid(value, amrsCon);
-            console.log("Form uuid",loadAmrsFormsIdByUuid.form_id)
-            this._formMap[parseInt(key,10)] = loadAmrsFormsIdByUuid.form_id;
+           if(loadAmrsFormsIdByUuid?.form_id){
+            this._formMap[parseInt(key,10)] = loadAmrsFormsIdByUuid?.form_id;
+           }
         }
 
         console.log("Form Map", this._formMap);
