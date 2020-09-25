@@ -31,7 +31,7 @@ export function toPersonInsertStatement(person: Person, replaceColumns?: any) {
 }
 
 export async function savePatient(patient: PatientData, personId: number, connection: Connection) {
-    console.log("user person id", personId);
+    // console.log("user person id", personId);
     const userMap = UserMapper.instance.userMap;
     let replaceColumns = {};
     if (userMap) {

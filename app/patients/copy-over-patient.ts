@@ -34,7 +34,7 @@ export default async function transferPatientToAmrs(personId: number) {
         await savePatientObs(patient.obs, patient, insertMap, amrsCon);
         await saveProviderData(patient.provider,insertMap, kenyaEmrCon, amrsCon);
         saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
-        // console.log('saved patient', saved);
+        // console.log('saved patient', saved.obs.find((obs)=> obs.obs_id === insertMap.obs[1314669]));
         await CM.rollbackTransaction(amrsCon);
     } catch (er) {
         console.error('Error saving patient:', er);
