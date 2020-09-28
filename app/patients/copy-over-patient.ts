@@ -13,7 +13,7 @@ export default async function transferPatientToAmrs(personId: number) {
     const kenyaEmrCon = await CM.getConnectionKenyaemr();
     const patient = await loadPatientData(personId, kenyaEmrCon);
     await CM.commitTransaction(kenyaEmrCon);
-    console.log('patient', patient);
+    // console.log('patient', patient);
     let amrsCon = await CM.getConnectionAmrs();
     amrsCon = await CM.startTransaction(amrsCon);
     try {
@@ -34,7 +34,7 @@ export default async function transferPatientToAmrs(personId: number) {
         await savePatientObs(patient.obs, patient, insertMap, amrsCon);
         await saveProviderData(patient.provider,insertMap, kenyaEmrCon, amrsCon);
         saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
-        // console.log('saved patient', saved.obs.find((obs)=> obs.obs_id === insertMap.obs[1314669]));
+        // console.log('saved patient', saved.obs.find((obs)=> obs.obs_id === insertMap.obs[649729]));
         await CM.rollbackTransaction(amrsCon);
     } catch (er) {
         console.error('Error saving patient:', er);

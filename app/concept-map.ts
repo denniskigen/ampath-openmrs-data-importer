@@ -5,6 +5,7 @@ export default class ConceptMapper {
     private _conceptMap?:ConceptMap;
 
     private mappedConceptsPath = 'metadata/found.csv';
+    private replaceConceptsPath = 'metadata/replace-concepts-in-memory.csv';
 
     private constructor() {
     }
@@ -20,9 +21,15 @@ export default class ConceptMapper {
             return;
         }
         let concepts = await readCsv(this.mappedConceptsPath);
+        let conceptsToReplace = await readCsv(this.replaceConceptsPath);
         // console.log('Mapped Concepts', concepts.grouped);
         let map:any = {};
         for(let o in concepts.grouped) {
+            if(conceptsToReplace.grouped[o]) {
+                map[o] = conceptsToReplace.grouped[o][0];
+                // console.log('replacing concept', conceptsToReplace.grouped[o][0]);
+                continue;
+            }
             map[o] = concepts.grouped[o][0];
         }
         this._conceptMap = map;

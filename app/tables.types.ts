@@ -154,7 +154,7 @@ export type Obs = {
     value_coded_name_id: number;
     value_drug: number;
     value_datetime: Date;
-    value_numeric: number;
+    value_numeric: number | null;
     value_modifier: string;
     value_text: string;
     value_complex: string;

@@ -7,8 +7,11 @@ import { PatientData } from "../patients/patient-data";
 import toInsertSql from "../prepare-insert-sql";
 import { InsertedMap } from "../inserted-map";
 import { OrderMap } from "./save-orders";
-
+import * as skipObs from "../../metadata/skip-obs.json";
+import * as DM from "../../metadata/data-type-map.json";
+const dataTypeMapping: DataTypeTransformMap = DM as DataTypeTransformMap;
 const CM = ConnectionManager.getInstance();
+
 
 export default async function savePatientObs(obsToInsert: Obs[], patient: PatientData, insertMap:InsertedMap, connection:Connection) {
     await ConceptMapper.instance.initialize();
@@ -25,15 +28,15 @@ export type ObsMap = {
 };
 
 export async function updateObsGroupIds(sourceObs:Obs[], insertMap:InsertedMap, connection:Connection) {
-    sourceObs.forEach(async (obs)=>{
-        if(obs.obs_group_id) {
-            if(!insertMap.obs[obs.obs_group_id]) {
+    sourceObs.forEach(async (obs) => {
+        if (obs.obs_group_id) {
+            if (!insertMap.obs[obs.obs_group_id]) {
                 console.warn('Parent obs id is missing from the insert map. Skipping updating of obs_group_id.', obs.obs_group_id);
                 // console.warn('Details:', obs);
                 return; // TODO throw error instead of returning
             }
 
-            if(!obs.amrs_obs_id) {
+            if (!obs.amrs_obs_id) {
                 console.warn('Obs was not inserted in AMRS. Skipping updates. Details:', obs);
                 return; // TODO throw error instead of returning
             }
@@ -90,22 +93,39 @@ export function toObsGroupIdUpdateStatement(obsId:number, obsGroupId:number){
 export function prepareObs(obsToInsert: Obs[], conceptMap: ConceptMapper): Obs[] {
     // replace concept ids with maps and convert to destination concept values
     // if a missing concept map or unknown data type concept is detected, then throw error
-    let obs:Obs[] = obsToInsert.map<Obs>((o,i,A):Obs=>{
+    let obs:Obs[] = obsToInsert.reduce<Obs[]>((filtered,o):Obs[]=>{
+        let obsId = o.obs_id.toString();
+        if((skipObs as any)[obsId]) {
+            console.log('Skipping obs', (skipObs as any)[obsId]);
+            return filtered;
+        }
         let newObs:Obs = Object.assign({},o);
         try { // TODO, to remove this before moving running in production
             assertObsConceptsAreMapped(o, conceptMap.conceptMap);
-            mapObsConcept(newObs,o, conceptMap.conceptMap);
-            mapObsValue(newObs,o, conceptMap.conceptMap);
+            if(dataTypeMapping[o.concept_id]) {
+                // a map is provided to handle concept and type transformations
+                transformObsConcept(dataTypeMapping[o.concept_id], newObs,o);
+            } else {
+                mapObsConcept(newObs,o, conceptMap.conceptMap);
+                mapObsValue(newObs,o, conceptMap.conceptMap);
+            }
+            
         } catch (err) {
+            // console.warn('Error:', err);
             newObs.comments = 'invalid';
         }
-        return newObs;
-    });
+        filtered.push(newObs);
+        return filtered;
+    }, []);
 
     return obs;
 }
 
 export function assertObsConceptsAreMapped(obs:Obs, conceptMap: ConceptMap) {
+    if(dataTypeMapping[obs.concept_id]) {
+        // explicit map provided
+        return;
+    }
     if(!conceptMap[obs.concept_id]) {
         throw new Error('Unmapped concept detected. Concept ID: ' + obs.concept_id);
     }
@@ -113,6 +133,11 @@ export function assertObsConceptsAreMapped(obs:Obs, conceptMap: ConceptMap) {
     if(obs.value_coded && !conceptMap[obs.value_coded]) {
         throw new Error('Unmapped concept detected. Concept ID: ' + obs.value_coded);
     }
+}
+
+export function transformObsConcept(transformInfo:DataTypeTransformInfo, newObs:Obs, sourceObs: Obs) {
+    newObs.concept_id = transformInfo.amrs_id;
+    transformObsValue(transformInfo,newObs,sourceObs);
 }
 
 export function mapObsConcept(newObs:Obs, sourceObs:Obs,  conceptMap: ConceptMap) {
@@ -124,7 +149,39 @@ export function mapObsValue(newObs:Obs, sourceObs:Obs,  conceptMap: ConceptMap) 
     if(areDatatypeEquivalent(foundConcept)) {
         mapMatchingTypeObsValue(newObs,sourceObs,conceptMap);
     } else {
-        throw new Error('conflicting data types detected. Details: ' + foundConcept);
+        throw new Error('Unresolved conflicting data types detected. Details: ' + foundConcept);
+    }
+}
+
+export type DataTypeTransformMap = {
+    [conceptId:string]:DataTypeTransformInfo;
+}
+
+export type DataTypeTransformInfo = {
+    amrs_id: number;
+    type: string;
+    values: {
+        [source:string]:string;
+    }
+}
+
+export function transformObsValue(transformInfo:DataTypeTransformInfo, newObs:Obs, sourceObs: Obs) {
+    switch (transformInfo.type) {
+        case 'coded-coded':
+            if(transformInfo.values[sourceObs.value_coded] === undefined) {
+                throw new Error(`Unresolved transformation for value ${sourceObs.value_coded}. Details ${transformInfo}`);
+            }
+            newObs.value_coded = parseInt(transformInfo.values[sourceObs.value_coded]);
+            break;
+        case 'numeric-coded':
+            if(transformInfo.values[sourceObs.value_numeric || ''] === undefined) {
+                throw new Error(`Unresolved transformation for value ${sourceObs.value_numeric}. Details ${transformInfo}`);
+            }
+            newObs.value_coded = parseInt(transformInfo.values[sourceObs.value_numeric || '']);
+            newObs.value_numeric = null;
+            break;
+        default:
+            throw new Error('Unknown conversion type. Details: ' + transformInfo);
     }
 }
 
