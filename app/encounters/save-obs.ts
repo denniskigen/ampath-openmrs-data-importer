@@ -7,8 +7,10 @@ import { PatientData } from "../patients/patient-data";
 import toInsertSql from "../prepare-insert-sql";
 import { InsertedMap } from "../inserted-map";
 import { OrderMap } from "./save-orders";
+import * as skipObs from "../../metadata/skip-obs.json";
 
 const CM = ConnectionManager.getInstance();
+
 
 export default async function savePatientObs(obsToInsert: Obs[], patient: PatientData, insertMap:InsertedMap, connection:Connection) {
     await ConceptMapper.instance.initialize();
@@ -25,15 +27,15 @@ export type ObsMap = {
 };
 
 export async function updateObsGroupIds(sourceObs:Obs[], insertMap:InsertedMap, connection:Connection) {
-    sourceObs.forEach(async (obs)=>{
-        if(obs.obs_group_id) {
-            if(!insertMap.obs[obs.obs_group_id]) {
+    sourceObs.forEach(async (obs) => {
+        if (obs.obs_group_id) {
+            if (!insertMap.obs[obs.obs_group_id]) {
                 console.warn('Parent obs id is missing from the insert map. Skipping updating of obs_group_id.', obs.obs_group_id);
                 // console.warn('Details:', obs);
                 return; // TODO throw error instead of returning
             }
 
-            if(!obs.amrs_obs_id) {
+            if (!obs.amrs_obs_id) {
                 console.warn('Obs was not inserted in AMRS. Skipping updates. Details:', obs);
                 return; // TODO throw error instead of returning
             }
@@ -90,7 +92,12 @@ export function toObsGroupIdUpdateStatement(obsId:number, obsGroupId:number){
 export function prepareObs(obsToInsert: Obs[], conceptMap: ConceptMapper): Obs[] {
     // replace concept ids with maps and convert to destination concept values
     // if a missing concept map or unknown data type concept is detected, then throw error
-    let obs:Obs[] = obsToInsert.map<Obs>((o,i,A):Obs=>{
+    let obs:Obs[] = obsToInsert.reduce<Obs[]>((filtered,o):Obs[]=>{
+        let obsId = o.obs_id.toString();
+        if((skipObs as any)[obsId]) {
+            console.log('Skipping obs', (skipObs as any)[obsId]);
+            return filtered;
+        }
         let newObs:Obs = Object.assign({},o);
         try { // TODO, to remove this before moving running in production
             assertObsConceptsAreMapped(o, conceptMap.conceptMap);
@@ -99,8 +106,9 @@ export function prepareObs(obsToInsert: Obs[], conceptMap: ConceptMapper): Obs[]
         } catch (err) {
             newObs.comments = 'invalid';
         }
-        return newObs;
-    });
+        filtered.push(newObs);
+        return filtered;
+    }, []);
 
     return obs;
 }
