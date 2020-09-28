@@ -6,54 +6,61 @@ import patientSearch from "./patient-search";
 import fetchKenyaEmrPersonIDs from "./load-kenya-emr-personIds";
 import exportRecurrentPatients from "./export-recurrent-patients";
 import { PatientComparator } from "../types/patient.types";
-import { Patient } from "../tables.types";
+import ora from "ora";
+import chalk from "chalk";
 
 const connection = ConnectionManager.getInstance();
 
-const loadData = async (patient_id: number) => {
-  const kenyaEmrConnection = await connection.getConnectionKenyaemr();
+init();
 
-  try {
-    return await loadPatientData(patient_id, kenyaEmrConnection);
-  } catch (e) {
-    console.error("Error loading patient data: ", e);
+async function init() {
+  const noOfPatients = 25;
+  const data = await checkForDuplicatePatients(noOfPatients);
+  // exportRecurrentPatients(data);
+}
+
+async function checkForDuplicatePatients(patientCount: number) {
+  // const patients = await fetchKenyaEmrPersonIDs(patientCount);
+  const patients = [{ patient_id: 445 }, { patient_id: 454 }];
+  const patientIds = patients.map((patient) => patient.patient_id);
+  let patientList: any[] = [];
+
+  console.log("Patient IDs loaded: ", patientIds);
+  for (const [index, id] of patientIds.entries()) {
+    let spinner = ora(
+      `Searching for possible duplicates using patient ID ${chalk.bold.green(
+        id
+      )} ` + chalk`({blue ${index + 1} of ${patientIds.length}}) \n`
+    ).start();
+    let list: PatientComparator[] = await checkForExistingPatients(id);
+    spinner.succeed(`Check completed for ID ${chalk.green(id)}`);
+    spinner.info(
+      `${
+        list.length
+          ? chalk.bold.red(list.length)
+          : chalk.bold.green(list.length)
+      } ${list.length === 1 ? "duplicate" : "duplicates"} found\n`
+    );
+    if (list.length) {
+      console.log(
+        chalk`{red Potential duplicates found: ${JSON.stringify(
+          list,
+          undefined,
+          2
+        )}}\n`
+      );
+    }
+    patientList.push(list);
   }
-};
+  return patientList;
+}
 
-const fetchPatient = async (name: string): Promise<Array<any>> => {
-  return new Promise((resolve, reject) => {
-    patientSearch(name)
-      .then((patients) => {
-        resolve(patients.results);
-      })
-      .catch((err) => {
-        console.log("Error fetching patient with name: " + name, err);
-        reject(err);
-      });
-  });
-};
-
-const getPatients = async (names: PatientName[]) => {
-  let results: any[] = [];
-  names.map((name) => {
-    const { family_name, middle_name, given_name } = name;
-    results.push(fetchPatient(family_name));
-    results.push(fetchPatient(middle_name));
-    results.push(fetchPatient(given_name));
-  });
-  return Promise.all(results);
-};
-
-const getPatientIdentifiers = async (identifiers: Identifier[]) => {
-  return identifiers.map((identifier) => constructCCCIdentifier(identifier));
-};
-
-const calculateAge = (birthdate: any): number => {
-  return moment().diff(birthdate, "years");
-};
-
-const checkForExistingPatients = async (id: number) => {
+async function checkForExistingPatients(
+  id: number
+): Promise<PatientComparator[]> {
+  let patientListWithoutDuplicates: PatientComparator[] = [];
   const patientData = await loadData(id);
+
   if (patientData && Object.keys(patientData).length) {
     const {
       person: { birthdate, gender },
@@ -80,48 +87,72 @@ const checkForExistingPatients = async (id: number) => {
 
     patientList = filterByNames(patientList, names);
 
-    let combinedPatientList: Array<any> = patientList.map((patient) => {
-      return {
-        amrsPersonUuid: patient.person.uuid,
-        amrsIdentifiers: getIdentifersCommaSeparated(
-          getIdentifiers(patient.identifiers)
-        ),
-        kenyaEMRPersonId: id,
-        kenyaEMRIdentifiers: getIdentifersCommaSeparated(
-          getIdentifiers(identifiers)
-        ),
-        kenyaEMRNames: flattenName(getNames(names)),
-      };
-    });
+    let combinedPatientList: Array<PatientComparator> = patientList.map(
+      (patient) => {
+        return {
+          amrsNames: patient.person?.display,
+          amrsPersonUuid: patient.person?.uuid,
+          amrsIdentifiers: getCommaSeparatedIdentifiers(
+            getIdentifiers(patient.identifiers)
+          ),
+          kenyaEMRPersonId: id,
+          kenyaEMRIdentifiers: getCommaSeparatedIdentifiers(
+            getIdentifiers(identifiers)
+          ),
+          kenyaEMRNames: flattenName(getNames(names)),
+        };
+      }
+    );
 
-    const duplicateFreeCombinedPatientList = combinedPatientList.filter(
+    patientListWithoutDuplicates = combinedPatientList.filter(
       (patient, index, patientList) =>
         getIndexOfPatient(patientList, patient) === index
     );
-    console.table(duplicateFreeCombinedPatientList);
-    return duplicateFreeCombinedPatientList;
   }
-};
+  return patientListWithoutDuplicates;
+}
 
-const findPossiblePatientMatch = async (patientCount: number) => {
-  const patients = await fetchKenyaEmrPersonIDs(patientCount);
-  const patientIds = patients.map((patient) => patient.patient_id);
-  let list = [];
-  for (const id of patientIds) {
-    let arr_pl = await checkForExistingPatients(id);
-    list.push(arr_pl);
+async function loadData(patient_id: number) {
+  const kenyaEmrConnection = await connection.getConnectionKenyaemr();
+
+  try {
+    return await loadPatientData(patient_id, kenyaEmrConnection);
+  } catch (e) {
+    console.error("Error loading patient data: ", e);
   }
-  return list;
-};
+}
 
-const init = async () => {
-  const data = await findPossiblePatientMatch(25);
-  console.table(data);
-  exportRecurrentPatients(data);
-};
+async function getPatients(names: PatientName[]) {
+  let results: any[] = [];
+  names.map((name) => {
+    const { family_name, middle_name, given_name } = name;
+    results.push(fetchPatient(family_name));
+    results.push(fetchPatient(middle_name));
+    results.push(fetchPatient(given_name));
+  });
+  return Promise.all(results);
+}
 
-// Entrypoint
-init();
+async function fetchPatient(name: string) {
+  return new Promise((resolve, reject) => {
+    patientSearch(name)
+      .then((patient) => {
+        resolve(patient.results);
+      })
+      .catch((error) => {
+        console.log(`Error fetching patient named '${name}': `, error);
+        reject(error);
+      });
+  });
+}
+
+async function getPatientIdentifiers(identifiers: Identifier[]) {
+  return identifiers.map((identifier) => constructCCCIdentifier(identifier));
+}
+
+const calculateAge = (birthdate: Date): number => {
+  return moment().diff(birthdate, "years");
+};
 
 const filterByNames = (
   patientList: Array<any>,
@@ -166,7 +197,7 @@ const constructCCCIdentifier = (identifier: any) => {
 
 const getIndexOfPatient = (patientList: Array<any>, patient: any) => {
   return patientList.findIndex(
-    (p) => p.Amrs_person_uuid === patient.Amrs_person_uuid
+    (p) => p.amrsPersonUuid === patient.amrsPersonUuid
   );
 };
 
@@ -178,7 +209,7 @@ const getIdentifiers = (identifiers: Array<any>): Array<string> => {
   return identifierList;
 };
 
-const getIdentifersCommaSeparated = (identifiers: Array<string>): string => {
+const getCommaSeparatedIdentifiers = (identifiers: Array<string>): string => {
   return identifiers.join();
 };
 
@@ -229,13 +260,13 @@ type PatientName = {
   uuid: string;
 };
 
-type OpenMRSMetadata = {
-  changed_by: number | null;
-  date_created: Date;
-  date_changed: Date | null;
-  date_voided: Date | null;
-  voided: number;
-  voided_by: number | null;
-  void_reason: string | null;
-  uuid: string;
-};
+// type OpenMRSMetadata = {
+//   changed_by: number | null;
+//   date_created: Date;
+//   date_changed: Date | null;
+//   date_voided: Date | null;
+//   voided: number;
+//   voided_by: number | null;
+//   void_reason: string | null;
+//   uuid: string;
+// };
