@@ -1,11 +1,11 @@
 import ConnectionManager from '../connection-manager';
-import savePatientData, { savePatient } from './save-new-patient';
+import savePatientData, { savePatient, savePersonAddress, savePersonName } from './save-new-patient';
 import loadPatientData, { loadPatientDataByUuid } from './load-patient-data';
 import saveVisitData from '../visits/save-visit-data';
 import { InsertedMap } from '../inserted-map';
 import savePatientObs from '../encounters/save-obs';
-import saveProviderData, { saveProvider } from '../providers/save-provider-data';
-import saveEncounterData, { saveEncounterProviderData } from '../encounters/save-encounters';
+import saveProviderData from '../providers/save-provider-data';
+import saveEncounterData from '../encounters/save-encounters';
 import savePatientOrders from '../encounters/save-orders';
 const CM = ConnectionManager.getInstance();
 
@@ -20,7 +20,7 @@ export default async function transferPatientToAmrs(personId: number) {
         await savePatientData(patient, amrsCon);
         let saved = await loadPatientDataByUuid(patient.person.uuid, amrsCon);
 
-        await savePatient(patient, saved.person.person_id, amrsCon)
+        await savePatient(patient, saved.person.person_id, amrsCon)    
         let insertMap: InsertedMap = {
             patient: saved.person.person_id,
             visits: {},
@@ -28,8 +28,10 @@ export default async function transferPatientToAmrs(personId: number) {
             obs: {},
             orders: {}
         };
+        await savePersonAddress(patient, insertMap, amrsCon)
+        await savePersonName(patient, insertMap, amrsCon)
         await saveVisitData(patient, insertMap, kenyaEmrCon, amrsCon);
-        await saveEncounterData(patient.encounter,insertMap,amrsCon);
+        await saveEncounterData(patient.encounter,insertMap,amrsCon,kenyaEmrCon);
         await savePatientOrders(patient.orders, patient, insertMap, amrsCon);
         await savePatientObs(patient.obs, patient, insertMap, amrsCon);
         await saveProviderData(patient.provider,insertMap, kenyaEmrCon, amrsCon);

@@ -128,8 +128,8 @@ export default class ConnectionManager {
         await this.closePool(this.kenyaemrPool);
     }
     async releaseConnections(kenyaEmrCon: mysql.Connection, amrsCon: mysql.Connection) {
-        await kenyaEmrCon.destroy();
-        await amrsCon.destroy();
+        kenyaEmrCon.destroy();
+        amrsCon.destroy();
     }
     private async closePool(pool: Pool): Promise<any> {
         return new Promise((success, error) => {
