@@ -13,7 +13,7 @@ export default async function transferPatientToAmrs(personId: number) {
     const kenyaEmrCon = await CM.getConnectionKenyaemr();
     const patient = await loadPatientData(personId, kenyaEmrCon);
     await CM.commitTransaction(kenyaEmrCon);
-    console.log('patient', patient);
+    // console.log('patient', patient);
     let amrsCon = await CM.getConnectionAmrs();
     amrsCon = await CM.startTransaction(amrsCon);
     try {
