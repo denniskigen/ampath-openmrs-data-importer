@@ -1,4 +1,6 @@
+import chalk from "chalk";
 import moment from "moment";
+import ora from "ora";
 
 import ConnectionManager from "../connection-manager";
 import loadPatientData from "../patients/load-patient-data";
@@ -6,8 +8,6 @@ import patientSearch from "./patient-search";
 import fetchKenyaEmrPersonIDs from "./load-kenya-emr-personIds";
 import exportRecurrentPatients from "./export-recurrent-patients";
 import { PatientComparator } from "../types/patient.types";
-import ora from "ora";
-import chalk from "chalk";
 
 const connection = ConnectionManager.getInstance();
 
@@ -16,24 +16,33 @@ init();
 async function init() {
   const noOfPatients = 25;
   const data = await checkForDuplicatePatients(noOfPatients);
-  // exportRecurrentPatients(data);
+  const output = flatten(data);
+  exportDuplicatesData(output);
 }
 
 async function checkForDuplicatePatients(patientCount: number) {
-  // const patients = await fetchKenyaEmrPersonIDs(patientCount);
-  const patients = [{ patient_id: 445 }, { patient_id: 454 }];
+  const patients = await fetchKenyaEmrPersonIDs(patientCount);
+  // const patients = [{ patient_id: 445 }];
   const patientIds = patients.map((patient) => patient.patient_id);
   let patientList: any[] = [];
 
   console.log("Patient IDs loaded: ", patientIds);
+  console.log("");
   for (const [index, id] of patientIds.entries()) {
-    let spinner = ora(
+    const NS_PER_SEC = 1e9;
+    const time = process.hrtime();
+    let spinner: ora.Ora = ora(
       `Searching for possible duplicates using patient ID ${chalk.bold.green(
         id
       )} ` + chalk`({blue ${index + 1} of ${patientIds.length}}) \n`
     ).start();
     let list: PatientComparator[] = await checkForExistingPatients(id);
-    spinner.succeed(`Check completed for ID ${chalk.green(id)}`);
+    const diff = process.hrtime(time);
+    const timeInSecs = (diff[0] * NS_PER_SEC + diff[1]) / NS_PER_SEC;
+    spinner.succeed(
+      `Check completed for ID ${chalk.green(id)} ` +
+        chalk`({cyan Time: ${timeInSecs.toFixed(2)}s})`
+    );
     spinner.info(
       `${
         list.length
@@ -42,13 +51,7 @@ async function checkForDuplicatePatients(patientCount: number) {
       } ${list.length === 1 ? "duplicate" : "duplicates"} found\n`
     );
     if (list.length) {
-      console.log(
-        chalk`{red Potential duplicates found: ${JSON.stringify(
-          list,
-          undefined,
-          2
-        )}}\n`
-      );
+      console.log(chalk.bold.red(`${JSON.stringify(list, undefined, 2)}\n`));
     }
     patientList.push(list);
   }
@@ -148,6 +151,26 @@ async function fetchPatient(name: string) {
 
 async function getPatientIdentifiers(identifiers: Identifier[]) {
   return identifiers.map((identifier) => constructCCCIdentifier(identifier));
+}
+
+async function exportDuplicatesData(data: any[]) {
+  if (Array.isArray(data) && data.length) {
+    let spinner: ora.Ora = ora(
+      chalk.blue(`Writing duplicates to CSV file`)
+    ).start();
+    exportRecurrentPatients(data).then(
+      (success) => {
+        spinner.succeed(
+          `Data successfully exported to ${chalk.bold.red(
+            "./metadata/possible-existing-patients.csv"
+          )}`
+        );
+        console.log("");
+        console.log(chalk.bold.gray("Completed all operations."));
+      },
+      (fail) => spinner.fail(`Failed to export CSV: ${fail}`)
+    );
+  }
 }
 
 const calculateAge = (birthdate: Date): number => {

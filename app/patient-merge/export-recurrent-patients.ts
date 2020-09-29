@@ -12,7 +12,6 @@ export default async function exportRecurrentPatients(data: Array<any>) {
       { id: "amrsNames", title: "AMRS names" },
     ],
   });
-  csvWriter
-    .writeRecords(data)
-    .then(() => console.log("Data written to CSV file successfully"));
+  return await csvWriter.writeRecords(data);
+  // .then(() => console.log("Data written to CSV file successfully"));
 }
