@@ -1,17 +1,16 @@
-const createCSVWriter = require('csv-writer').createObjectCsvWriter;
+const createCSVWriter = require("csv-writer").createObjectCsvWriter;
 
 export default async function exportRecurrentPatients(data: Array<any>) {
-    const csvWriter = createCSVWriter({
-        path: './metadata/possible-existing-patients.csv',
-        header: [
-            {id: 'Kenya_emr_personId', title: 'KenyaEMR personID'},
-            {id: 'Kenya_emr_identifiers', title: 'KenyaEMR identifiers'},
-            {id: 'Kenya_emr_names', title: 'KenyaEMR names'},
-            {id: 'Amrs_person_uuid', title: 'AMRS person uuid'},
-            {id: 'Amrs_identifiers', title: 'AMRS identifiers'},
-            {id: 'Amrs_names', title: 'AMRS names'}
-        ]
-    });
-    csvWriter.writeRecords(data)
-    .then(() => console.log('Data was written to csv file successfully'));
+  const csvWriter = createCSVWriter({
+    path: "./metadata/possible-existing-patients.csv",
+    header: [
+      { id: "kenyaEMRPersonId", title: "KenyaEMR person ID" },
+      { id: "kenyaEMRIdentifiers", title: "KenyaEMR identifiers" },
+      { id: "kenyaEMRNames", title: "KenyaEMR names" },
+      { id: "amrsPersonId", title: "AMRS person UUID" },
+      { id: "amrsIdentifiers", title: "AMRS identifiers" },
+      { id: "amrsNames", title: "AMRS names" },
+    ],
+  });
+  return await csvWriter.writeRecords(data);
 }
